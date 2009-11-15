@@ -6,9 +6,9 @@
     /**
      * This input field is for text input of whole numbers.
      * @requires yahoo.base, yahoo.dom, yahoo.event
-     * @namespace validator
+     * @namespace YAHOO.widget
      * @class IntegerField
-     * @extends validator.DoubleField
+     * @extends YAHOO.widget.DoubleField
      * @constructor
      * @param {Object} config Configuration JSON.
      */

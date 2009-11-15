@@ -7,9 +7,9 @@
     /**
      * This input field is for text input of doubles or floats.
      * @requires yahoo.base, yahoo.dom, yahoo.event
-     * @namespace validator
+     * @namespace YAHOO.widget
      * @class DoubleField
-     * @extends validator.TextBaseField
+     * @extends YAHOO.widget.TextBaseField
      * @constructor
      * @param {Object} config Configuration JSON.
      */

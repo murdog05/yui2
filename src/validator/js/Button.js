@@ -9,9 +9,10 @@
      * This is a button object that will represent a button that is controlled
      * by the form validator.  The buttons only function will be to enable and disable
      * depending on the validity of the data entered on the form.
-     * @namespace validator
+     * @namespace YAHOO.widget
      * @requires yahoo.base, yahoo.dom, yahoo.event
      * @class Button
+     * @extends YAHOO.widget.ValidatorBase
      * @constructor
      * @param {Object} config Configuration for the button that will be applied to the properties of the button (Probably just a button el)
      */

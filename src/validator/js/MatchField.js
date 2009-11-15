@@ -6,9 +6,9 @@
      * This field is for matching two inputs on the form.  For instance, this would
      * be useful for having users re-enter passwords, or re-enter e-mail addresses.
      * @requires yahoo.base, yahoo.dom, yahoo.event
-     * @namespace validator
+     * @namespace YAHOO.widget
      * @class MatchField
-     * @extends validator.TextBaseField
+     * @extends YAHOO.widget.TextBaseField
      * @constructor
      * @param {Object} config Configuration JSON object.
      */

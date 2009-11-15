@@ -3,6 +3,14 @@
     var Y = YAHOO,
     YL = Y.lang,
     validator = YAHOO.widget;
+    /**
+     * This is the base class that provides easy setting and retreival of configuration attributes.
+     * @requires yahoo.base, yahoo.dom, yahoo.event
+     * @namespace YAHOO.widget
+     * @class ValidatorBase
+     * @constructor
+     * @param {Object} config Configuration object containing everything for configuring the form validator object.
+     */
     function _ValidatorBase(config){
         var ATTRS = {},currentConstructor = this.constructor;
         this.getATTRS = function() {return ATTRS;};
@@ -19,20 +27,16 @@
         this._initializeCfg(config);
     }
     
-    _ValidatorBase.ATTRS = {
-        test1:{
-            value:'someval1',
-            setter:function(val){
-                return val + '_modified';
-            }
-        },
-        test2:{
-            value:'anotherVal'
-        }
+    _ValidatorBase.ATTRS = {        
     };
 
     _ValidatorBase.prototype = {
-        //ATTRS:null,
+        /**
+         * This will initialize the given ATTRS block by merging it into the main private
+         * ATTRs variable
+         * @method _initializeAttr
+         * @param {Object} ATTRS Attribute settings
+         */
         _initializeAttr:function(ATTRS){
             var _ATTRS = this.getATTRS(),
             key,theVal;
@@ -51,6 +55,8 @@
         /**
          * This will take the given configuration, and merge it with the
          * properties in the ATTR.
+         * @method _initializeCfg
+         * @param {Object} config Configuration object.
          */
         _initializeCfg:function(config){
             if (config === null || config === undefined) return; // don't do anything will null config
@@ -62,6 +68,12 @@
                 }
             }
         },
+        /**
+         * This will set the given value under the given key in the settings
+         * @method set
+         * @param {string} key Name of the property the value will be set
+         * @param {object} val Value to be set for the propert, this can be anything.
+         */
         set:function(key,val){
             var ATTRS = this.getATTRS(),
             att = ATTRS[key],call;
@@ -83,6 +95,12 @@
                 ATTRS[key] = {value:val};
             }
         },
+        /**
+         * This will return the value with the given property name
+         * @method get
+         * @param {string} key Name of the property.
+         * @return {object} value stored under the given property name.
+         */
         get:function(key){
             var ATTRS = this.getATTRS(),att = ATTRS[key],call;
             if (att === null || att === undefined){

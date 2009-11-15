@@ -113,8 +113,9 @@
      * @module validator
      * @title Form Validator Widget
      * @requires yahoo.base, yahoo.dom, yahoo.event
-     * @namespace validator
-     * @class Form
+     * @namespace YAHOO.widget
+     * @class Validator
+     * @extends YAHOO.widget.ValidatorBase
      * @constructor
      * @param {Object} config Configuration object containing everything for configuring the form validator object.
      */

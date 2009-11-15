@@ -11,9 +11,9 @@
      * should be selected.  Or if you want to have a user enter either a username, or an e-mail
      * address.
      * @requires yahoo.base, yahoo.dom, yahoo.event
-     * @namespace validator
+     * @namespace YAHOO.widget
      * @class GroupBaseField
-     * @extends validator.BaseInputField
+     * @extends YAHOO.widget.BaseInputField
      * @constructor
      * @param {Object} config JSON configuration object containing the properties of the GroupBaseField
      */

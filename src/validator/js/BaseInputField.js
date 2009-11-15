@@ -9,9 +9,9 @@
      * This class is what all Input fields used in the form validator will inherit from.  This provides
      * the basic general attributes and functions required by all input fields.
      * @requires yahoo.base, yahoo.dom, yahoo.event
-     * @namespace validator
+     * @namespace YAHOO.widget
      * @class BaseInputField
-     * @extends Base
+     * @extends YAHOO.widget.ValidatorBase
      * @constructor
      */
     function _BaseInputField(){

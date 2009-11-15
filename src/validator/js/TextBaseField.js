@@ -10,9 +10,9 @@
      * This class is the text base input field and will be extended by all
      * Inputs who's values will be text based in anyway.  Examples include a number input,
      * select box or a text input.
-     * @namespace validator
+     * @namespace YAHOO.widget
      * @class TextBaseField
-     * @extends validator.BaseInputField
+     * @extends YAHOO.widget.BaseInputField
      * @constructor
      * @param {Object} config Configuratino settings for the input.
      * @param {boolean} initialize Flag that says whether or not to call the initialize input function

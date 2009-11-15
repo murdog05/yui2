@@ -8,9 +8,9 @@
      * This field is for SELET input.  This will ensure that a non-empty value is
      * selected in the field in order for it to be considered valid.
      * @requires yahoo.base, yahoo.dom, yahoo.event
-     * @namespace validator
+     * @namespace YAHOO.widget
      * @class SelectField
-     * @extends validator.TextBaseField
+     * @extends YAHOO.widget.TextBaseField
      * @constructor
      * @param {Object} config Configuration json object.
      */

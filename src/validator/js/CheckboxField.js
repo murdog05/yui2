@@ -9,9 +9,9 @@
      * This will represent a checkbox field in the form validator.  Checkbox
      * field can be put into a group based field or left on its' own.
      * @requires yahoo.base, yahoo.dom, yahoo.event
-     * @namespace validator
+     * @namespace YAHOO.widget
      * @class CheckboxField
-     * @extends validator.BaseInputField
+     * @extends YAHOO.widget.BaseInputField
      * @constructor
      * @param {Object} config Configuration for the checkbox field.  Probably just the validWhenChecked property
      */

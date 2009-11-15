@@ -7,9 +7,9 @@
     /**
      * This is a catch all class for types of input that do not fit the existing input types.
      * @requires yahoo.base, yahoo.dom, yahoo.event
-     * @namespace validator
+     * @namespace YAHOO.widget
      * @class CustomField
-     * @extends validator.BaseInputField
+     * @extends YAHOO.widget.BaseInputField
      * @constructor
      */
     function _CustomField(config){

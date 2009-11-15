@@ -7,9 +7,9 @@
      * This field is for password input on a form.  This would be used for having users
      * select a password, and requiring a minimum strength to be required.
      * @requires yahoo.base, yahoo.dom, yahoo.event
-     * @namespace validator
+     * @namespace YAHOO.widget
      * @class PasswordField
-     * @extends validator.TextBaseField
+     * @extends YAHOO.widget.TextBaseField
      * @constructor
      * @param {Object} config Configuration object
      */
