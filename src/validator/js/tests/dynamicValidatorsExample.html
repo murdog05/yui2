@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title></title>
+        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+        <link rel="stylesheet" href="css/validatorCss.css" type="text/css" />
+        <script type="text/javascript" src="http://yui.yahooapis.com/2.8.0r4/build/yahoo-dom-event/yahoo-dom-event.js"></script>
+        <script type="text/javascript" src="http://yui.yahooapis.com/2.8.0r4/build/element/element-debug.js"></script>
+
+        <script type="text/javascript" src="../form-element.js"></script>
+        <script type="text/javascript" src="../form.js"></script>
+        <script type="text/javascript" src="../button.js"></script>
+        <script type="text/javascript" src="../validator.js"></script>
+        <script type="text/javascript" src="../indicator.js"></script>
+        <script type="text/javascript">
+            window.onload = function() {
+                var form = new YAHOO.widget.Form('basicExample1',{
+                    defaultSettings:{
+                        indicator:{
+                            className:'validator'
+                        }
+                    },
+                    inputs:{
+                        firstName:{
+                            validation:'text',
+                            indicators:['correct','incorrect']
+                        },
+                        lastName:{
+                            validation:function(el) {return el.value !== '';},
+                            indicators:['correct','incorrect']
+                        },
+                        username:{
+                            validation:function(el) {return el.value !== '';},
+                            indicators:['correct','incorrect']
+                        },
+                        email:{
+                            validation:'email',
+                            indicators:['correct','incorrect']
+                        },
+                        age:{
+                            validation:{
+                                type:'integer',
+                                max:100,
+                                min:3
+                            },
+                            indicators:['rangeCheck','correct','incorrect']
+                        },
+                        income:{
+                            validation:{
+                                type:'double',
+                                max:40000,
+                                min:0,
+                                maxDecimalPlaces:2
+                            },
+                            indicators:[
+                                'correct','incorrect',
+                                {
+                                    el:'incomeRange',
+                                    atts:{
+                                        className:'validatorText',
+                                        html:function(validator){
+                                            return 'Income must be between ' + validator.get('min') + ' and ' + validator.get('max');
+                                        }
+                                    },
+                                    events:YAHOO.widget.Form.formEvents.notInRange
+                                }
+                            ]
+                        }
+                    }                    
+                });
+                //YAHOO.util.Event.on('clearButton','click',function(){form.clear()});
+                //YAHOO.util.Event.on('clearButton2','click',function(){form2.clear()});
+            }
+        </script>
+    </head>
+    <body>
+        <div class="mainContainer">
+            <form id="basicExample1" action="formPost.html">
+                <div class="formBody">
+                    <h2>Simple Dynamic Validators</h2>
+                    <div class="info">
+                        This shows the bare minimum needed in order to
+                        get the form validator working with your existing form.
+                        The form validator will insert indicators and validators
+                        for your inputs.
+                    </div>
+                    <div class="row">
+                        <div class="column1Backing"></div>
+                        <div class="column2Backing"></div>
+                        <div class="label">First Name:</div>
+                        <div class="value">
+                            <input id="firstName" type="text" />
+                        </div>
+                        <div class="label">Last Name:</div>
+                        <div class="value">
+                            <input id="lastName" type="text" />
+                        </div>
+                        <div class="clearDiv"></div>
+                    </div>
+                    <div class="row">
+                        <div class="column1Backing"></div>
+                        <div class="column2Backing"></div>
+                        <div class="label">User Name:</div>
+                        <div class="value">
+                            <input id="username" type="text" />
+                        </div>
+                        <div class="label">Email:</div>
+                        <div class="value">
+                            <input id="email" type="text" />
+                        </div>
+                        <div class="clearDiv"></div>
+                    </div>
+                    <div class="row">
+                        <div class="column1Backing"></div>
+                        <div class="column2Backing"></div>
+                        <div class="label">Age:</div>
+                        <div class="value">
+                            <input id="age" type="text" />
+                        </div>
+                        <div class="label">Income ($):</div>
+                        <div class="value">
+                            <input id="income" type="text" />
+                        </div>
+                        <div class="clearDiv"></div>
+                    </div>
+                    <div id="incomeRange">
+                        
+                    </div>
+                    <div class="buttonRow">
+                        <input type="submit" id="save" class="button" value="Save" />
+                        <!--<input type="button" id="clearButton" class="button" value="Clear" />-->
+                        <input type="reset" class="button" value="Reset" />
+                        <input type="button" class="button" value="Cancel" />
+                    </div>
+                </div>
+            </form>            
+        </div>
+    </body>
+</html>

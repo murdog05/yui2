@@ -1,0 +1,237 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
+   "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+    <head>
+        <title></title>
+        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+        <link rel="stylesheet" href="css/validatorCss.css" type="text/css" />
+        <script type="text/javascript" src="http://yui.yahooapis.com/2.8.0r4/build/yahoo-dom-event/yahoo-dom-event.js"></script>
+        <script type="text/javascript" src="http://yui.yahooapis.com/2.8.0r4/build/element/element-debug.js"></script>
+
+        <script type="text/javascript" src="../form-element.js"></script>
+        <script type="text/javascript" src="../form.js"></script>
+        <script type="text/javascript" src="../button.js"></script>
+        <script type="text/javascript" src="../validator.js"></script>
+        <script type="text/javascript" src="../indicator.js"></script>
+        <script type="text/javascript">
+            var validator = YAHOO.widget;
+            window.onload = function() {
+                var form = new YAHOO.widget.Form('basicExample',{                    
+                    inputs:{
+                        firstName:{
+                            validation:'text',
+                            indicators:[
+                                {
+                                    el:'firstNameIncorrect',
+                                    events:YAHOO.widget.Form.formEvents.incorrectIndicator
+                                },
+                                {
+                                    el:'firstNameCorrect',
+                                    events:YAHOO.widget.Form.formEvents.correctIndicator
+                                }
+                            ]
+                        },
+                        lastName:{
+                            validation:'text',
+                            indicators:[
+                                {
+                                    el:'lastNameIncorrect',
+                                    events:YAHOO.widget.Form.formEvents.incorrectIndicator
+                                },
+                                {
+                                    el:'lastNameCorrect',
+                                    events:YAHOO.widget.Form.formEvents.correctIndicator
+                                }
+                            ]
+                        },
+                        age:{
+                            validation:{
+                                type:'integer',
+                                max:100,
+                                min:3
+                            },
+                            indicators:[
+                                {
+                                    el:'ageIncorrect',
+                                    events:YAHOO.widget.Form.formEvents.incorrectIndicator
+                                },
+                                {
+                                    el:'ageCorrect',
+                                    events:YAHOO.widget.Form.formEvents.correctIndicator
+                                },
+                                'rangeCheck'
+                            ]
+                        },
+                        income:{
+                            validation:{
+                                type:'double',
+                                max:40000,
+                                min:0,
+                                maxDecimalPlaces:2
+                            },
+                            indicators:[
+                                {
+                                    el:'incomeIncorrect',
+                                    events:YAHOO.widget.Form.formEvents.incorrectIndicator
+                                },
+                                {
+                                    el:'incomeCorrect',
+                                    events:YAHOO.widget.Form.formEvents.correctIndicator
+                                },
+                                {
+                                    el:'incomeRange',
+                                    atts:{
+                                        className:'validatorText',
+                                        html:function(validator){
+                                            return 'Income must be between ' + validator.get('min') + ' and ' + validator.get('max');
+                                        }
+                                    },
+                                    events:YAHOO.widget.Form.formEvents.notInRange
+                                }
+                            ]
+                        },
+                        vehicle:{
+                            validation:function(el){return el.value !== 'none';},
+                            indicators:[
+                                new YAHOO.widget.Indicator('vehicleIncorrect',{events:YAHOO.widget.Form.formEvents.incorrectIndicator}),
+                                new YAHOO.widget.Indicator('vehicleCorrect',{events:YAHOO.widget.Form.formEvents.correctIndicator})
+                            ]
+                        },
+                        pet:{
+                            validation:'text',
+                            indicators:[
+                                {
+                                    el:'petIncorrect',
+                                    events:YAHOO.widget.Form.formEvents.incorrectIndicator
+                                },
+                                {
+                                    el:'petCorrect',
+                                    events:YAHOO.widget.Form.formEvents.correctIndicator
+                                }
+                            ]
+                        }
+                    }
+                });
+                //YAHOO.util.Event.addListener('clearButton','click',function(){form.clear()});
+                //alert(document.getElementById('firstName').tagName);
+
+            }            
+        </script>
+    </head>
+    <body>
+        <div class="mainContainer">
+            <form id="basicExample" action="formPost.html">
+                <div class="formBody">
+                    <h2>Basic Example</h2>
+                    <div class="info">
+                        A very simple example where you register which divs are your validators
+                        and indicators.
+                    </div>
+                    <div class="row">
+                        <div class="column1Backing"></div>
+                        <div class="column2Backing"></div>
+                        <div class="label">First Name:</div>
+                        <div class="value">
+                            <div id="firstNameIncorrect" class="validator">
+                                <span class="validator">&nbsp;</span>
+                            </div>
+                            <div id="firstNameCorrect" class="indicator" style="display:none;">
+                                <span class="indicator">&nbsp;</span>
+                            </div>
+                            <input id="firstName" type="text" />
+                        </div>
+                        <div class="label">Last Name:</div>
+                        <div class="value">
+                            <div id="lastNameIncorrect" class="validator">
+                                <span class="validator">&nbsp;</span>
+                            </div>
+                            <div id="lastNameCorrect" class="indicator" style="display:none;">
+                                <span class="indicator">&nbsp;</span>
+                            </div>
+                            <input id="lastName" type="text" />
+                        </div>
+                        <div class="clearDiv"></div>
+                    </div>
+                    <div class="row">
+                        <div class="column1Backing"></div>
+                        <div class="column2Backing"></div>
+                        <div class="label">Age:</div>
+                        <div class="value">
+                            <div id="ageIncorrect" class="validator">
+                                <span class="validator">&nbsp;</span>
+                            </div>
+                            <div id="ageCorrect" class="indicator" style="display:none;">
+                                <span class="indicator">&nbsp;</span>
+                            </div>
+                            <div class="innerValue">
+                                <input id="age" type="text" />
+                            </div>
+                        </div>
+                        <div class="label">Income ($):</div>
+                        <div class="value">
+                            <div id="incomeIncorrect" class="validator">
+                                <span class="validator">&nbsp;</span>
+                            </div>
+                            <div id="incomeCorrect" class="indicator" style="display:none;">
+                                <span class="indicator">&nbsp;</span>
+                            </div>
+                            <div class="innerValue">
+                                <input id="income" type="text" />
+                            </div>
+                        </div>
+                        <div class="clearDiv"></div>
+                    </div>
+                    <div id="incomeRange">
+
+                    </div>
+                    <div class="row">
+                        <div class="column1Backing"></div>
+                        <div class="column2Backing"></div>
+                        <div class="label">Pet:</div>
+                        <div class="value">
+                            <div id="petIncorrect" class="validator">
+                                <span class="validator">&nbsp;</span>
+                            </div>
+                            <div id="petCorrect" class="indicator" style="display:none;">
+                                <span class="indicator">&nbsp;</span>
+                            </div>
+                            <div class="innerValue">
+                                <select id="pet">
+                                    <option value="">-- Select a option --</option>
+                                    <option value="None">No Pet</option>
+                                    <option value="Dog">Dog</option>
+                                    <option value="Cat">Cat</option>
+                                    <option value="Bird">Bird</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="label">Vehicle:</div>
+                        <div class="value">
+                            <div id="vehicleIncorrect" class="validator">
+                                <span class="validator">&nbsp;</span>
+                            </div>
+                            <div id="vehicleCorrect" class="indicator" style="display:none;">
+                                <span class="indicator">&nbsp;</span>
+                            </div>
+                            <div class="innerValue">
+                                <select id="vehicle">
+                                    <option value="none">-- Select a option --</option>
+                                    <option value="car">Car</option>
+                                    <option value="truck">Truck</option>
+                                    <option value="horse">Horse</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="clearDiv"></div>
+                    </div>
+                    <div class="buttonRow">
+                        <input type="submit" class="button" value="Save" />
+                        <!--<input type="button" id="clearButton" class="button" value="Clear" />-->
+                        <input type="reset" class="button" value="Reset" />
+                        <input type="button" class="button" value="Cancel" />
+                    </div>
+                </div>
+            </form>
+        </div>
+    </body>
+</html>
