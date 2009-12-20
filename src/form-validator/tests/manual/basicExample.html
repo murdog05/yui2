@@ -1,5 +1,4 @@
-<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
-   "http://www.w3.org/TR/html4/loose.dtd">
+<!DOCTYPE html>
 <html>
     <head>
         <title></title>
@@ -8,41 +7,29 @@
         <script type="text/javascript" src="http://yui.yahooapis.com/2.8.0r4/build/yahoo-dom-event/yahoo-dom-event.js"></script>
         <script type="text/javascript" src="http://yui.yahooapis.com/2.8.0r4/build/element/element-debug.js"></script>
 
-        <script type="text/javascript" src="../form-element.js"></script>
-        <script type="text/javascript" src="../form.js"></script>
-        <script type="text/javascript" src="../button.js"></script>
-        <script type="text/javascript" src="../validator.js"></script>
-        <script type="text/javascript" src="../indicator.js"></script>
+        <script type="text/javascript" src="../../js/form-element.js"></script>
+        <script type="text/javascript" src="../../js/form-validator.js"></script>
+        <script type="text/javascript" src="../../js/form-button.js"></script>
+        <script type="text/javascript" src="../../js/field-validator.js"></script>
+        <script type="text/javascript" src="../../js/field-indicator.js"></script>
         <script type="text/javascript">
             var validator = YAHOO.widget;
             window.onload = function() {
-                var form = new YAHOO.widget.Form('basicExample',{                    
+                var form = new YAHOO.widget.FormValidator('basicExample',{
                     inputs:{
                         firstName:{
                             validation:'text',
-                            indicators:[
-                                {
-                                    el:'firstNameIncorrect',
-                                    events:YAHOO.widget.Form.formEvents.incorrectIndicator
-                                },
-                                {
-                                    el:'firstNameCorrect',
-                                    events:YAHOO.widget.Form.formEvents.correctIndicator
-                                }
-                            ]
+                            indicators:{
+                                invalid:{el:'firstNameIncorrect'},
+                                valid:{el:'firstNameCorrect'}
+                            }
                         },
                         lastName:{
                             validation:'text',
-                            indicators:[
-                                {
-                                    el:'lastNameIncorrect',
-                                    events:YAHOO.widget.Form.formEvents.incorrectIndicator
-                                },
-                                {
-                                    el:'lastNameCorrect',
-                                    events:YAHOO.widget.Form.formEvents.correctIndicator
-                                }
-                            ]
+                            indicators:{
+                                invalid:{el:'lastNameIncorrect'},
+                                valid:{el:'lastNameCorrect'}
+                            }
                         },
                         age:{
                             validation:{
@@ -50,17 +37,31 @@
                                 max:100,
                                 min:3
                             },
-                            indicators:[
-                                {
-                                    el:'ageIncorrect',
-                                    events:YAHOO.widget.Form.formEvents.incorrectIndicator
-                                },
-                                {
+                            indicators:{
+                                invalid:[
+                                    {el:'ageIncorrect'},
+                                    {
+                                        formatter:function(fieldValidator,fieldIndicator,meta){
+                                            var el = fieldIndicator.get('element'),belowMin = meta.numberBelowMin, aboveMax = meta.numberAboveMax;
+                                            if (belowMin !== null && belowMin !== undefined){
+                                                el.innerHTML = 'must be >= ' + belowMin.min;
+                                                el.style.display = '';
+                                            }
+                                            else if (aboveMax !== null && aboveMax !== undefined){
+                                                el.innerHTML = 'must be <= ' + aboveMax.max;
+                                                el.style.display = '';
+                                            }
+                                            else{
+                                                el.style.display = 'none';
+                                            }
+                                        }
+                                    }
+                                ],
+                                valid:{
                                     el:'ageCorrect',
-                                    events:YAHOO.widget.Form.formEvents.correctIndicator
-                                },
-                                'rangeCheck'
-                            ]
+                                    events:'valid'
+                                }
+                            }
                         },
                         income:{
                             validation:{
@@ -69,49 +70,59 @@
                                 min:0,
                                 maxDecimalPlaces:2
                             },
-                            indicators:[
-                                {
-                                    el:'incomeIncorrect',
-                                    events:YAHOO.widget.Form.formEvents.incorrectIndicator
-                                },
-                                {
-                                    el:'incomeCorrect',
-                                    events:YAHOO.widget.Form.formEvents.correctIndicator
-                                },
-                                {
-                                    el:'incomeRange',
-                                    atts:{
-                                        className:'validatorText',
-                                        html:function(validator){
-                                            return 'Income must be between ' + validator.get('min') + ' and ' + validator.get('max');
+                            indicators:{
+                                invalid:[
+                                    {
+                                        el:'incomeRange',
+                                        formatter:function(fieldValidator,fieldIndicator,meta){
+                                            var el = fieldIndicator.get('element'),belowMin = meta.numberBelowMin, aboveMax = meta.numberAboveMax;
+                                            if (belowMin !== null && belowMin !== undefined){
+                                                el.innerHTML = 'Income must be greater than or equal to ' + belowMin.min;
+                                                el.style.display = '';
+                                            }
+                                            else if (aboveMax !== null && aboveMax !== undefined){
+                                                el.innerHTML = 'Income must be less than or equal to ' + aboveMax.max;
+                                                el.style.display = '';
+                                            }
+                                            else{
+                                                el.style.display = 'none';
+                                            }
                                         }
-                                    },
-                                    events:YAHOO.widget.Form.formEvents.notInRange
-                                }
-                            ]
+                                    }
+                                ],
+                                valid:{el:'incomeCorrect'}
+                            }
                         },
                         vehicle:{
                             validation:function(el){return el.value !== 'none';},
-                            indicators:[
-                                new YAHOO.widget.Indicator('vehicleIncorrect',{events:YAHOO.widget.Form.formEvents.incorrectIndicator}),
-                                new YAHOO.widget.Indicator('vehicleCorrect',{events:YAHOO.widget.Form.formEvents.correctIndicator})
-                            ]
+                            indicators:{
+                                invalid:new YAHOO.widget.FieldIndicator('vehicleIncorrect'),
+                                valid:new YAHOO.widget.FieldIndicator('vehicleCorrect')
+                            }
                         },
                         pet:{
                             validation:'text',
-                            indicators:[
-                                {
-                                    el:'petIncorrect',
-                                    events:YAHOO.widget.Form.formEvents.incorrectIndicator
-                                },
-                                {
-                                    el:'petCorrect',
-                                    events:YAHOO.widget.Form.formEvents.correctIndicator
-                                }
-                            ]
+                            indicators:{
+                                invalid:{el:'petIncorrect'},
+                                valid:{el:'petCorrect'}
+                            }
                         }
                     }
                 });
+
+                var temp = {
+                    validation:'text',
+                    indicators:{
+                        valid:'correctIndicator',
+                        invalid:'incorrectIndicator'
+                    }
+                }
+                var temp2 = {
+                    validation:'text',
+                    indicators:{
+                        
+                    }
+                }
                 //YAHOO.util.Event.addListener('clearButton','click',function(){form.clear()});
                 //alert(document.getElementById('firstName').tagName);
 
@@ -164,7 +175,7 @@
                                 <span class="indicator">&nbsp;</span>
                             </div>
                             <div class="innerValue">
-                                <input id="age" type="text" />
+                                <input id="age" size="3" type="text" />
                             </div>
                         </div>
                         <div class="label">Income ($):</div>

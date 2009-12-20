@@ -12,7 +12,7 @@ if (YAHOO.widget === null || YAHOO.widget === undefined){
  * this, the EMPTY event must be fired second (change the validator isValid function
  * to do this).  If its done this way, the grou behaviour sounds be implemented soundly.
  *
- * Put these new predefined indicators in the form class under the property Form.indicators.group
+ * Put these new predefined indicators in the form class under the property FormValidator.indicators.group
  * so they are their own group of default indicators.
  */
 
@@ -27,13 +27,13 @@ if (YAHOO.widget === null || YAHOO.widget === undefined){
     YU = Y.util,
     YW = Y.widget,
     YD = YU.Dom
-    function Validator(el,config){
-        Validator.superclass.constructor.apply(this,arguments);
+    function FieldValidator(el,config){
+        FieldValidator.superclass.constructor.apply(this,arguments);
         this._initializeValidator(config);
     }    
 
-    YL.augmentObject(Validator,{
-        defaultInitializer:{
+    YL.augmentObject(FieldValidator,{
+        DefaultInitializer:{
             /**
              * This will initialize the events on the el as if it where
              * a text input
@@ -90,54 +90,54 @@ if (YAHOO.widget === null || YAHOO.widget === undefined){
         /**
          * Premade validator functions that cover most validation situations.
          */
-        validators:{
+        Validators:{
             integer:function(el){
                 var value = el.value,theVal;
-                if (!YW.Form.INTEGERREGEX.test(value)){
-                    this.fireEvent('incorrectFormat');
+                if (!YW.FormValidator.INTEGERREGEX.test(value)){
+                    //this.fireEvent('incorrectFormat');
+                    this.addError('incorrectFormat','Format of number is incorrect')
                     return false;
                 }
                 if ( value.indexOf( '.' ) != -1 ){
-                    this.fireEvent('incorrectFormat');
+                    this.addError('incorrectFormat','Format of number is incorrect')
                     return false; // don't allow numbers with decimals
                 }
                 try{theVal = parseInt(value,10);}
                 catch(e){return false;}
 
                 if ( theVal.toString().toLowerCase() == 'nan' ){
-                    this.fireEvent('incorrectFormat');
+                    this.addError('incorrectFormat','Format of number is incorrect')
                     return false;
                 }
                 else{
-                    this.fireEvent('correctFormat');
-                    return this._checkRange(theVal);
+                    return this._validation._checkRange(theVal,this);
                 }
             },
             'double':function(el){
-                var value = el.value,numVal = 0,maxDecimals = this.get('maxDecimalPlaces'),decimals;
+                var value = el.value,numVal = 0,maxDecimals = this._validation.get('maxDecimalPlaces'),decimals;
                 if ((maxDecimals != -1) && (value.indexOf('.') != -1)){
-                    this.fireEvent('incorrectFormat');
+                    this.addError('incorrectFormat','Format of double is incorrect')
                     decimals = value.split('.')[1];
                     if (decimals.length > maxDecimals) {
                         return false;
                     }
                 }
-                if (!YW.Form.DOUBLEREGEX.test(el.value)){
-                    this.fireEvent('incorrectFormat');
+                if (!YW.FormValidator.DOUBLEREGEX.test(el.value)){
+                    this.addError('incorrectFormat','Format of double is incorrect')
                     return false;
                 }                
                 try{numVal = parseFloat(value,10);}
                 catch(e){return false;}
 
                 if (numVal.toString() === null || numVal.toString() === undefined){
-                    this.fireEvent('incorrectFormat');
+                    this.addError('incorrectFormat','Format of double is incorrect')
                     return false;
                 }
                 if (numVal.toString().toLowerCase() == 'nan'){
-                    this.fireEvent('incorrectFormat');
+                    this.addError('incorrectFormat','Format of double is incorrect')
                     return false;
                 }
-                return this._checkRange(numVal);
+                return this._validation._checkRange(numVal,this);
             },
             text:function(el){
                 // TODO: Put in length checking, perhaps use the max property, then the same functionality
@@ -146,7 +146,7 @@ if (YAHOO.widget === null || YAHOO.widget === undefined){
             },
             email:function(el){
                 // TODO: Put in length checking
-                return YW.Form.EMAILREGEX.test(el.value);
+                return YW.FormValidator.EMAILREGEX.test(el.value);
             },
             checked:function(el){
                 return el.checked;
@@ -159,14 +159,14 @@ if (YAHOO.widget === null || YAHOO.widget === undefined){
          * Premade functions that specify when an input is considered empty.
          * More can be added, as well as the existing one overridden.
          */
-        emptyWhen:{
+        EmptyWhen:{
             notext:function(el){
                 return el.value === '';
             }
         }
     });
 
-    YL.augmentObject(Validator,{
+    YL.augmentObject(FieldValidator,{
         ATTRS:{
             /**
              * This is only for a group input.  For a group type input
@@ -182,7 +182,7 @@ if (YAHOO.widget === null || YAHOO.widget === undefined){
              */
             minInclusive:{
                 value:true,
-                setter:YW.Form._setBoolean
+                setter:YW.FormValidator._setBoolean
             },
             /**
              * This is set to true if the maximum allowed values boundary is inclusive
@@ -191,7 +191,7 @@ if (YAHOO.widget === null || YAHOO.widget === undefined){
              */
             maxInclusive:{
                 value:true,
-                setter:YW.Form._setBoolean
+                setter:YW.FormValidator._setBoolean
             },
             /**
              * This is the minimum allowed value in the double field.  Default value
@@ -209,8 +209,8 @@ if (YAHOO.widget === null || YAHOO.widget === undefined){
                     if (!YL.isNumber(rtVl)){
                         throw 'Invalid value given for min: ' + val;
                     }
-                    if (rtVl < (-1)*YW.Form.MAX_INTEGER){
-                        return (-1)*YW.Form.MAX_INTEGER;
+                    if (rtVl < (-1)*YW.FormValidator.MAX_INTEGER){
+                        return (-1)*YW.FormValidator.MAX_INTEGER;
                     }
                     return rtVl;
                 }
@@ -222,7 +222,7 @@ if (YAHOO.widget === null || YAHOO.widget === undefined){
              * @type number
              */
             max:{
-                value:YW.Form.MAX_INTEGER,
+                value:YW.FormValidator.MAX_INTEGER,
                 setter:function(val){
                     var rtVl = val;
                     if (!YL.isNumber(rtVl)){
@@ -231,8 +231,8 @@ if (YAHOO.widget === null || YAHOO.widget === undefined){
                     if (!YL.isNumber(rtVl)){
                         throw 'Invalid value given for max: ' + val;
                     }
-                    if (rtVl > YW.Form.MAX_INTEGER){
-                        return YW.Form.MAX_INTEGER;
+                    if (rtVl > YW.FormValidator.MAX_INTEGER){
+                        return YW.FormValidator.MAX_INTEGER;
                     }
                     return rtVl;
                 }
@@ -266,7 +266,7 @@ if (YAHOO.widget === null || YAHOO.widget === undefined){
             type:{
                 value:'text',
                 setter:function(val){
-                    return Validator._initializeChecker('type',val,Validator.validators);
+                    return FieldValidator._initializeChecker('type',val,FieldValidator.Validators);
                 }
             },
             /**
@@ -277,7 +277,7 @@ if (YAHOO.widget === null || YAHOO.widget === undefined){
             empty:{
                 value:'notext',
                 setter:function(val){
-                    return Validator._initializeChecker('empty',val,Validator.emptyWhen);
+                    return FieldValidator._initializeChecker('empty',val,FieldValidator.EmptyWhen);
                 }
             }
         },
@@ -288,25 +288,25 @@ if (YAHOO.widget === null || YAHOO.widget === undefined){
          * to the text inputs onkeyup event, as well as the onblur event.  While for a checkbox, it
          * would be the checkbox's onclick event.
          */
-        inputEventInitializers:{
-            checkbox:Validator.defaultInitializer._initializeClickEvent,
-            radio:Validator.defaultInitializer._initializeClickEvent,
-            text:Validator.defaultInitializer._initializeTextChangeEvents,
-            hidden:Validator.defaultInitializer._initializeTextChangeEvents,
-            password:Validator.defaultInitializer._initializeTextChangeEvents,
-            file:Validator.defaultInitializer._initializeChangeEvents
+        InputEventInitializers:{
+            checkbox:FieldValidator.DefaultInitializer._initializeClickEvent,
+            radio:FieldValidator.DefaultInitializer._initializeClickEvent,
+            text:FieldValidator.DefaultInitializer._initializeTextChangeEvents,
+            hidden:FieldValidator.DefaultInitializer._initializeTextChangeEvents,
+            password:FieldValidator.DefaultInitializer._initializeTextChangeEvents,
+            file:FieldValidator.DefaultInitializer._initializeChangeEvents
         },
         /**
          * These are the same initializers as in inputEventInitializers, except for NON-INPUT tags
          * such as select and textarea.
          */
-        otherEventInitializers:{
-            textarea:Validator.defaultInitializer._initializeTextChangeEvents,
-            select:Validator.defaultInitializer._initializeChangeEvents
+        OtherEventInitializers:{
+            textarea:FieldValidator.DefaultInitializer._initializeTextChangeEvents,
+            select:FieldValidator.DefaultInitializer._initializeChangeEvents
         }
     });
     
-    YL.extend(Validator,YW.FormElement,{
+    YL.extend(FieldValidator,YW.FormElement,{
         _validator:null,
         /**
          * Based on the type of input given, this will initailize the change events on that input.
@@ -315,15 +315,15 @@ if (YAHOO.widget === null || YAHOO.widget === undefined){
             var el = this.get('element'),type = el.getAttribute('type'),tagName = el.tagName.toLowerCase();
             if (tagName == 'input'){
                 if (type === null || type === undefined){
-                    Validator.defaultInitializer._initializeTextChangeEvents(el,this);
+                    FieldValidator.DefaultInitializer._initializeTextChangeEvents(el,this);
                 }
                 else{
                     type = type.toLowerCase();
-                    Validator.inputEventInitializers[type](el,this);
+                    FieldValidator.InputEventInitializers[type](el,this);
                 }
             }
             else{
-                Validator.otherEventInitializers[tagName](el,this);
+                FieldValidator.OtherEventInitializers[tagName](el,this);
             }            
         },
         
@@ -342,60 +342,75 @@ if (YAHOO.widget === null || YAHOO.widget === undefined){
         _evntOnChange:function(e){
             this.checkStatus()
         },
+        _getMetaWrapper:function(){
+            var meta = {
+                errors:{},
+                _validation:this,
+                addError:function(key,msg){
+                    this.errors[key] = msg;
+                },
+                _validator:this._validator,
+                _empty:this._empty
+            };
+            return meta;
+        },
         /**
          * This will check the validity of the input
          * and throw the proper events based on the empty and validation functions.
          */
-        checkStatus:function(){
+        checkStatus:function(silent){
             var isEmpty,isValid,el;
             el = this.get('element');
-            isEmpty = this._empty(el);
-            isValid = this._validator(el);
-            
+            var meta = this._getMetaWrapper();
+            isEmpty = meta._empty(el);
+            isValid = meta._validator(el);//this._validator(el);
+            // if silent, don't invoke any events
+            if (silent === true){
+                return isValid;
+            }
             if (isEmpty){
-                this.fireEvent('inputEmpty');
+                this.fireEvent('inputEmpty',meta.errors);
             }
             else{
-                this.fireEvent('inputNotEmpty');
+                this.fireEvent('inputNotEmpty',meta.errors);
             }
 
             if (isValid){
-                this.fireEvent('inputValid');
+                this.fireEvent('inputValid',meta.errors);
             }
             else{
-                this.fireEvent('inputInvalid');
+                this.fireEvent('inputInvalid',meta.errors);
             }
-            this.fireEvent('inputValueChange');
+            this.fireEvent('inputValueChange',meta.errors);
             return isValid;
         },
         /**
          * used only for numbers, this will check the range and fire
          * a value out of range event if the value is out of range.
          */
-        _checkRange:function(numVal){
+        _checkRange:function(numVal,errorMeta){
             var minInclusive,maxInclusive,min,max;
             minInclusive = this.get('minInclusive');
             maxInclusive = this.get('maxInclusive');
             min = this.get('min');
             max = this.get('max');            
             if (minInclusive && (min > numVal)){
-                this.fireEvent('numberOutOfRange');
+                errorMeta.addError('numberBelowMin',{min:min});
                 return false;
             }
             else if (!minInclusive && (min >= numVal)){
-                this.fireEvent('numberOutOfRange');
+                errorMeta.addError('numberBelowMin',{min:min});
                 return false;
             }
             else if (maxInclusive && (max < numVal)){
-                this.fireEvent('numberOutOfRange');
+                errorMeta.addError('numberAboveMax',{max:max});
                 return false;
             }
             else if (!maxInclusive && (max <= numVal)){
-                this.fireEvent('numberOutOfRange');
+                errorMeta.addError('numberAboveMax',{max:max});
                 return false;
             }
             else{
-                this.fireEvent('numberInRange');
                 return true;
             }
         },
@@ -405,7 +420,8 @@ if (YAHOO.widget === null || YAHOO.widget === undefined){
          */
         isValid:function(){
             var el = this.get('element');
-            return this._validator(el);
+            return this.checkStatus(true);
+            //return this._validator(el);
         }
     /**
          * Fires when the input is considered valid
@@ -432,5 +448,5 @@ if (YAHOO.widget === null || YAHOO.widget === undefined){
          * @event textTooLong
          */
     });
-    YAHOO.widget.Validator = Validator;
+    YAHOO.widget.FieldValidator = FieldValidator;
 })();

@@ -7,14 +7,14 @@
         <script type="text/javascript" src="http://yui.yahooapis.com/2.8.0r4/build/yahoo-dom-event/yahoo-dom-event.js"></script>
         <script type="text/javascript" src="http://yui.yahooapis.com/2.8.0r4/build/element/element-debug.js"></script>
 
-        <script type="text/javascript" src="../form-element.js"></script>
-        <script type="text/javascript" src="../form.js"></script>
-        <script type="text/javascript" src="../button.js"></script>
-        <script type="text/javascript" src="../validator.js"></script>
-        <script type="text/javascript" src="../indicator.js"></script>
+        <script type="text/javascript" src="../../js/form-element.js"></script>
+        <script type="text/javascript" src="../../js/form-validator.js"></script>
+        <script type="text/javascript" src="../../js/form-button.js"></script>
+        <script type="text/javascript" src="../../js/field-validator.js"></script>
+        <script type="text/javascript" src="../../js/field-indicator.js"></script>
         <script type="text/javascript">
             window.onload = function() {
-                var form = new YAHOO.widget.Form('basicExample1',{
+                var form = new YAHOO.widget.FormValidator('basicExample1',{
                     defaultSettings:{
                         indicator:{
                             className:'validator'
@@ -23,27 +23,43 @@
                     inputs:{
                         firstName:{
                             validation:'text',
-                            indicators:['correct','incorrect']
+                            indicators:{
+                                valid:'correct',
+                                invalid:'incorrect'
+                            }
                         },
                         lastName:{
-                            validation:function(el) {return el.value !== '';},
-                            indicators:['correct','incorrect']
+                            validation:'text',
+                            indicators:{
+                                valid:'correct',
+                                invalid:'incorrect'
+                            }
                         },
                         username:{
-                            validation:function(el) {return el.value !== '';},
-                            indicators:['correct','incorrect']
+                            validation:'text',
+                            indicators:{
+                                valid:'correct',
+                                invalid:'incorrect'
+                            }
                         },
                         email:{
                             validation:'email',
-                            indicators:['correct','incorrect']
+                            indicators:{
+                                valid:'correct',
+                                invalid:'incorrect'
+                            }
                         },
+                        // all thats left is to put in the range checking
                         age:{
                             validation:{
                                 type:'integer',
                                 max:100,
                                 min:3
                             },
-                            indicators:['rangeCheck','correct','incorrect']
+                            indicators:{
+                                valid:'correct',
+                                invalid:'incorrect'
+                            }
                         },
                         income:{
                             validation:{
@@ -52,21 +68,12 @@
                                 min:0,
                                 maxDecimalPlaces:2
                             },
-                            indicators:[
-                                'correct','incorrect',
-                                {
-                                    el:'incomeRange',
-                                    atts:{
-                                        className:'validatorText',
-                                        html:function(validator){
-                                            return 'Income must be between ' + validator.get('min') + ' and ' + validator.get('max');
-                                        }
-                                    },
-                                    events:YAHOO.widget.Form.formEvents.notInRange
-                                }
-                            ]
+                            indicators:{
+                                valid:'correct',
+                                invalid:'incorrect'
+                            }
                         }
-                    }                    
+                    }          
                 });
                 //YAHOO.util.Event.on('clearButton','click',function(){form.clear()});
                 //YAHOO.util.Event.on('clearButton2','click',function(){form2.clear()});
