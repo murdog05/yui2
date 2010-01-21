@@ -10,7 +10,7 @@
     YW = Y.widget,
     YD = YU.Dom;
     function FormElement(el,map){
-        FormElement.superclass.constructor.apply(this,[el,this._copy(map)]);
+        FormElement.superclass.constructor.apply(this,[el,map]);
     }
     YL.augmentObject(FormElement,{
         /**
@@ -22,14 +22,14 @@
          * @return {HTMLElement} dom object
          */
         standardElSetter:function(el){
-            if (el === null || el === undefined){
+            if (!el){
                 return null;
             }
             var rtVl = el;
             if (YL.isString(el)){
                 rtVl = YD.get(el);
             }
-            if (rtVl === null || rtVl === undefined){
+            if (!rtVl){
                 return el;
             }
             else{
@@ -38,40 +38,9 @@
         }
     })
     YL.extend(FormElement,YAHOO.util.Element,{
-        /**
-         * This will make a copy of the given object
-         */
-        _copy:function(obj){
-            var key,val,copy = {};
-            if (obj === null || obj === undefined){
-                return {};
-            }
-            if (YL.isString(obj) || YL.isNumber(obj) || YL.isFunction(obj)){
-                return obj;
-            }
-            for (key in obj){
-                val = obj[key];
-                if (val instanceof YW.FormElement){
-                    copy[key] = val;
-                }
-                else if (YL.isArray(val)){                    
-                    copy[key] = val;
-                }
-                else if (YL.isFunction(val)){
-                    copy[key] = val;
-                }
-                else if (YL.isObject(val)){
-                    copy[key] = this._copy(val);
-                }
-                else{
-                    copy[key] = val;
-                }
-            }
-            return copy;
-        },
         initAttributes:function(map){
             var key,attrs;
-            if (map === null || map === undefined){
+            if (!map){
                 return;
             }
             FormElement.superclass.initAttributes.apply(this,arguments);

@@ -1,6 +1,3 @@
-if (YAHOO.widget === null || YAHOO.widget === undefined){
-    YAHOO.widget = {};
-}
 (function(){
     var Y = YAHOO,
     YL = Y.lang,
@@ -14,11 +11,8 @@ if (YAHOO.widget === null || YAHOO.widget === undefined){
      */
     function FormValidator(el,config){
         FormValidator.superclass.constructor.apply(this,arguments);
-        this._initializeSubmitButtons();
-        this._initializeInputs(config);
-        this._initializeEvents();
-        this.updateForm();
-    }    
+        this._init(config)
+    }
 
     YL.augmentObject(FormValidator,{
         ATTRS:{
@@ -75,6 +69,16 @@ if (YAHOO.widget === null || YAHOO.widget === undefined){
     });
     Y.extend(FormValidator,YW.FormElement,{
         /**
+         * This will initialize the form validator
+         * @constructor
+         */
+        _init:function(config){
+            this._initializeSubmitButtons();
+            this._initializeInputs(config);
+            this._initializeEvents();
+            this.updateForm();
+        },
+        /**
          * This will hold all inputs that have validation applied to them
          * within the form.
          * @property _validation
@@ -94,39 +98,39 @@ if (YAHOO.widget === null || YAHOO.widget === undefined){
          */
         _setupDomItem:function(indicatorEl,inputEl,createAtts){
             var theDom = indicatorEl,defaultSettings = this.get('defaultSettings'),html,className,indicatorType = 'span';
-            if (defaultSettings !== null && defaultSettings !== undefined && defaultSettings.indicator !== null && defaultSettings.indicator !== undefined){
+            if (defaultSettings && defaultSettings.indicator){
                 html = defaultSettings.indicator.html;
-                if (html === null || html === undefined){
+                if (!html){
                     html = '&nbsp;';
                 }
                 className = defaultSettings.indicator.className;                
-                if (defaultSettings.indicator.tagType !== null && defaultSettings.indicator.tagType !== undefined){
+                if (defaultSettings.indicator.tagType){
                     indicatorType = defaultSettings.indicator.tagType;
                 }
             }
             // TODO: Check atts for settings used to create indicator.
-            if (createAtts !== null && createAtts !== undefined){
-                if (createAtts.html !== null && createAtts.html !== undefined){
+            if (createAtts){
+                if (createAtts.html){
                     html = createAtts.html;
                 }
-                if (createAtts.className !== null && createAtts.className !== undefined){
+                if (createAtts.className){
                     className = createAtts.className;
                 }
-                if (createAtts.indicatorType !== null && createAtts.indicatorType !== undefined){
+                if (createAtts.indicatorType){
                     indicatorType = createAtts.indicatorType;
                 }
             }
             if (YL.isString(theDom)){
                 theDom = YD.get(theDom);
-                if (theDom !== null && theDom !== undefined){
+                if (theDom){
 
                     // if there are creation atts attached, use those, but do not use
                     // the defaults
-                    if (createAtts !== null && createAtts !== undefined){
-                        if (createAtts.html !== undefined && createAtts.html !== null){
+                    if (createAtts){
+                        if (createAtts.html){
                             theDom.innerHTML = createAtts.html;
                         }
-                        if (createAtts.className !== undefined && createAtts.className !== null){
+                        if (createAtts.className){
                             theDom.className = createAtts.className;
                         }
                     }
@@ -134,9 +138,9 @@ if (YAHOO.widget === null || YAHOO.widget === undefined){
                 }
             }
             // create the dom element, and then insert it beside the input dom.
-            if ((theDom === null || theDom === undefined)){
+            if (!theDom){
                 theDom = document.createElement(indicatorType);
-                if (indicatorEl !== null && indicatorEl !== undefined){
+                if (indicatorEl){
                     theDom.id = indicatorEl;
                 }
                 YD.insertAfter(theDom,inputEl);                
@@ -144,7 +148,7 @@ if (YAHOO.widget === null || YAHOO.widget === undefined){
             if (!YL.isFunction(html)){
                 theDom.innerHTML = html;
             }
-            if ((theDom.className === '' || theDom.className === null || theDom.className === undefined) && (className !== null && className !== undefined)){
+            if ((theDom.className === '' || !theDom.className) && className){
                 theDom.className = className;
             }
             return theDom;
@@ -154,9 +158,11 @@ if (YAHOO.widget === null || YAHOO.widget === undefined){
          * For each input in the configuration, this will initialize the validation on
          * the input field, then register the indicators with the events specified in
          * the configuration.  Indicators elements will be created as neccessary
+         *
+         * config.inputs
          */
         _initializeInputs:function(config){
-            var inputs = config.inputs,curInput,j,curIndsJson,inds,key,indicatorKey,el,inputCfg;
+            var inputs = config.inputs,curInput,j,curIndsJson,inds,key,indicatorKey,el,inputCfg,ind,tempCfg;
             this._validation = [];
             this._indicators = [];
             for (key in inputs){
@@ -164,15 +170,20 @@ if (YAHOO.widget === null || YAHOO.widget === undefined){
                 inputCfg = inputs[key];
                 // TODO: put in group support
                 if (YL.isFunction(inputCfg.validation)){
-                    curInput = new YAHOO.widget.FieldValidator(el,{type:inputCfg.validation});
+                    curInput = new YAHOO.widget.FieldValidator(el,{
+                        type:inputCfg.validation
+                        });
                 }
                 else if (YL.isObject(inputCfg.validation)){
                     curInput = new YAHOO.widget.FieldValidator(el,inputCfg.validation);
                 }
                 else {
-                    curInput = new YAHOO.widget.FieldValidator(el,{type:inputCfg.validation});
+                    curInput = new YAHOO.widget.FieldValidator(el,{
+                        type:inputCfg.validation
+                        });
                 }
-                curInput.subscribe('inputValueChange',this._onFormChange,this,true);
+                // NOT needed as we are using event delegation now.
+                //curInput.subscribe('inputValueChange',this._onFormChange,this,true);
                 inds = inputCfg.indicators;
                 // singular, will subscribe to just the input change event
                 if (inds instanceof YW.FieldIndicator){
@@ -192,20 +203,40 @@ if (YAHOO.widget === null || YAHOO.widget === undefined){
                         }
                     }
                 }
+
+                ind = inputCfg.indicator;
+                if (ind){
+                    if (ind instanceof YW.FieldIndicator){
+                        // if just an indicator is given, it is automatically subscribed to all
+                        this._initializeIndicator('all',curInput,ind);
+                    }
+                    else{
+                        if (YL.isArray(ind)){
+                            for (j = 0 ; j < ind.length; ++j){
+                                this._initializeIndicator('invalid',curInput,ind[j]);
+                            }
+                        }
+                        else{
+                            this._initializeIndicator('invalid',curInput,ind);
+                        }
+                    }
+                }
+
+                
                 this._validation.push(curInput);
             }
         },
         _initializeIndicator:function(eventSetting,fieldValidator,indJson){
-            var indicator,curIndJson = indJson,indicatorEl,events = FormValidator.FormEvents[eventSetting];
+            var indicator,curIndJson = indJson,indicatorEl,events = FormValidator.FormEvents[eventSetting].call();
             if (indJson instanceof YW.FieldIndicator){
                 indicator = curIndJson;
-                //events = indicator.get('events');
+            //events = indicator.get('events');
             }
             else{
                 // Possibly could detect leading # sign and take it as an id... not sure
                 // how events would work though
                 if (YL.isString(curIndJson)){
-                    curIndJson = FormValidator.Indicators[curIndJson];
+                    curIndJson = FormValidator.Indicators[curIndJson].call();
                 }
                 // create the el from the JSON markup, don't touch the JSON markup
                 // because it may be re-used later.
@@ -219,50 +250,50 @@ if (YAHOO.widget === null || YAHOO.widget === undefined){
          * This will intialize the an indicator based ont he given json.  The input
          * is the validation object attach to the form's input field.
          */
-//        _initializeIndicator:function(inputValidation,indJson){
-//            var indicator,curIndJson = indJson,indicatorEl,events;
-//            if (indJson instanceof YW.FieldIndicator){
-//                indicator = curIndJson;
-//                events = indicator.get('events');
-//            }
-//            else{
-//                // Possibly could detect leading # sign and take it as an id... not sure
-//                // how events would work though
-//                if (YL.isString(indJson)){
-//                    curIndJson = FormValidator.Indicators[curIndJson];
-//                }
-//                if (YL.isString(curIndJson.events)){
-//                    events = FormValidator.FormEvents[curIndJson.events];
-//                }
-//                else{
-//                    events = curIndJson.events;
-//                }
-//
-//                // create the el from the JSON markup, don't touch the JSON markup
-//                // because it may be re-used later.
-//                indicatorEl = this._setupDomItem(curIndJson.el,inputValidation.get('element'),curIndJson.atts);
-//                indicator = new YW.FieldIndicator(indicatorEl,curIndJson.atts);
-//            }
-//            this._registerIndicators(inputValidation,indicator,events);
-//            this._indicators.push(indicator);
-//        },
+        //        _initializeIndicator:function(inputValidation,indJson){
+        //            var indicator,curIndJson = indJson,indicatorEl,events;
+        //            if (indJson instanceof YW.FieldIndicator){
+        //                indicator = curIndJson;
+        //                events = indicator.get('events');
+        //            }
+        //            else{
+        //                // Possibly could detect leading # sign and take it as an id... not sure
+        //                // how events would work though
+        //                if (YL.isString(indJson)){
+        //                    curIndJson = FormValidator.Indicators[curIndJson];
+        //                }
+        //                if (YL.isString(curIndJson.events)){
+        //                    events = FormValidator.FormEvents[curIndJson.events];
+        //                }
+        //                else{
+        //                    events = curIndJson.events;
+        //                }
+        //
+        //                // create the el from the JSON markup, don't touch the JSON markup
+        //                // because it may be re-used later.
+        //                indicatorEl = this._setupDomItem(curIndJson.el,inputValidation.get('element'),curIndJson.atts);
+        //                indicator = new YW.FieldIndicator(indicatorEl,curIndJson.atts);
+        //            }
+        //            this._registerIndicators(inputValidation,indicator,events);
+        //            this._indicators.push(indicator);
+        //        },
         /**
          * This will register and indicator with events of the validator based
          * on what was given in the configuration
          */
         _registerIndicators:function(validator,indicator,eventCfg){
             var i,methodName,method,events;
-            if (eventCfg === null || eventCfg === undefined){
+            if (!eventCfg){
                 return;
             }
             for (methodName in eventCfg){
                 method = indicator[methodName];
                 if (!YL.isFunction(method)){
-                    throw 'You can only use functions to subscribe to validator events';
+                    YAHOO.log('You can only use functions to subscribe to validator events','warn','FormValidator');
                 }
                 events = eventCfg[methodName];
                 for (i = 0 ; i < events.length; ++i){
-                    validator.subscribe(events[i],method,validator,indicator);
+                    validator.subscribe(events[i],method,this,indicator);
                 }
             }
         },
@@ -275,6 +306,12 @@ if (YAHOO.widget === null || YAHOO.widget === undefined){
             var el = this.get('element');
             YU.Event.on(el,'submit',this._onFormSubmit,this,true);
             YU.Event.on(el,'reset',this._onFormReset,this,true);
+            
+            // When input values are changed
+            YU.Event.on(el,'keyup',this._onFormInteraction,this,true);
+            YU.Event.on(el,'blur',this._onFormInteraction,this,true);
+            YU.Event.on(el,'click',this._onFormInteraction,this,true);
+            YU.Event.on(el,'change',this._onFormInteraction,this,true);
         },
         /**
          * This will take all submit buttons, wrap them in a button object
@@ -298,7 +335,7 @@ if (YAHOO.widget === null || YAHOO.widget === undefined){
          */
         _getSubmitButtons:function(parent){
             var rtVl = [],children,i;
-            if ((parent.tagName !== null && parent.tagName !== undefined) && (parent.tagName.toLowerCase() == 'input') && (parent.type == 'submit')){
+            if (parent.tagName && (parent.tagName.toLowerCase() == 'input') && (parent.type == 'submit')){
                 return [parent];
             }
             children = YD.getChildren(parent)
@@ -313,7 +350,7 @@ if (YAHOO.widget === null || YAHOO.widget === undefined){
         updateForm:function(){
             var vals = this._validation,i,isValid = true;
             for (i = 0 ; i < vals.length; ++i){
-                if (!vals[i].checkStatus()){
+                if (!vals[i].validate()){
                     isValid = false;
                 }
             }
@@ -354,6 +391,28 @@ if (YAHOO.widget === null || YAHOO.widget === undefined){
             // later add the before submit function checks as well
             // as the before submit event
             this.fireEvent('onFormSubmit');
+        },
+        /**
+         * This will be the event delgator.  Whenever a user interacts with the form
+         * in anyway, this will obtain the target, and delegate the event if the
+         * target is a form input.
+         */
+        _onFormInteraction:function(evt){
+            var event = evt || window.event,target = event.target || event.srcElement,validator = this.getValidatorByInput(target);
+            if (validator){
+                validator.validate();
+                this._onFormChange();
+            }
+        },
+        /**
+         * Given an input DOM, this will return the field's validation object
+         */
+        getValidatorByInput:function(dom){
+            var vs = this._validation,i;
+            for (i = 0; i < vs.length; ++i){
+                if (vs[i].get('element') == dom) return vs[i];
+            }
+            return null;
         },
         /**
          * This will get called when the form is reset, this will cause the form to recheck all it's values

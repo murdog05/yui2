@@ -1,7 +1,3 @@
-if (YAHOO.widget === null || YAHOO.widget === undefined){
-    YAHOO.widget = {};
-}
-
 /**
  * For group inputs, allow for sub elements to be put into the validator object.
  * There will then be a group validator that will be used to determine if the
@@ -29,34 +25,34 @@ if (YAHOO.widget === null || YAHOO.widget === undefined){
     YD = YU.Dom
     function FieldValidator(el,config){
         FieldValidator.superclass.constructor.apply(this,arguments);
-        this._initializeValidator(config);
+        this._initializeValidator();
     }    
 
     YL.augmentObject(FieldValidator,{
-        DefaultInitializer:{
-            /**
-             * This will initialize the events on the el as if it where
-             * a text input
-             */
-            _initializeTextChangeEvents:function(el,validator){
-                YU.Event.on(el,'keyup',validator._evntOnChange,validator,true);
-                YU.Event.on(el,'blur',validator._evntOnChange,validator,true);
-            },
-            /**
-             * This will initialize the change event to be fired when
-             * the input is clicked
-             */
-            _initializeClickEvent:function(el,validator){
-                YU.Event.on(el,'click',validator._evntOnChange,validator,true);
-            },
-            /**
-             * This will initialize the change event to be fired when the change
-             * event on the dom is fired.
-             */
-            _initializeChangeEvents:function(el,validator){
-                YU.Event.on(el,'change',validator._evntOnChange,validator,true);
-            }
-        },
+//        DefaultInitializer:{
+//            /**
+//             * This will initialize the events on the el as if it where
+//             * a text input
+//             */
+//            _initializeTextChangeEvents:function(el,validator){
+//                YU.Event.on(el,'keyup',validator._evntOnChange,validator,true);
+//                YU.Event.on(el,'blur',validator._evntOnChange,validator,true);
+//            },
+//            /**
+//             * This will initialize the change event to be fired when
+//             * the input is clicked
+//             */
+//            _initializeClickEvent:function(el,validator){
+//                YU.Event.on(el,'click',validator._evntOnChange,validator,true);
+//            },
+//            /**
+//             * This will initialize the change event to be fired when the change
+//             * event on the dom is fired.
+//             */
+//            _initializeChangeEvents:function(el,validator){
+//                YU.Event.on(el,'change',validator._evntOnChange,validator,true);
+//            }
+//        },
         /**
          * This will initialize any property that is considered a checker.  A checker
          * is a function that will cause an event to happen based on its return value.
@@ -64,14 +60,14 @@ if (YAHOO.widget === null || YAHOO.widget === undefined){
          */
         _initializeChecker:function(key,val,map){
             var checker = val,temp,regex;
-            if (checker === null || checker === undefined){
+            if (!checker) {
                 return null;
             }
             else if (YL.isString(checker)){
                 // check and see if the string is a predefined validator function
                 temp = map[checker.toLowerCase()];
                 // if it isn't, then we will assume its a regular expression
-                if ((temp === undefined) || (temp === null)){
+                if (!temp){
                     regex = new RegExp(checker);
                     return function(el){
                         return regex.test(el.value);
@@ -83,7 +79,7 @@ if (YAHOO.widget === null || YAHOO.widget === undefined){
                 }
             }
             else if (!YL.isFunction(checker)){
-                throw 'Please provide a valid type, function or regular expression for the ' + key + ' attribute';
+                YAHOO.log('Please provide a valid type, function or regular expression for the ' + key + ' attribute','warn','FieldValidator');
             }
             return checker;
         },
@@ -129,7 +125,7 @@ if (YAHOO.widget === null || YAHOO.widget === undefined){
                 try{numVal = parseFloat(value,10);}
                 catch(e){return false;}
 
-                if (numVal.toString() === null || numVal.toString() === undefined){
+                if (!numVal.toString()){
                     this.addError('incorrectFormat','Format of double is incorrect')
                     return false;
                 }
@@ -207,7 +203,8 @@ if (YAHOO.widget === null || YAHOO.widget === undefined){
                         rtVl = parseFloat(rtVl);
                     }
                     if (!YL.isNumber(rtVl)){
-                        throw 'Invalid value given for min: ' + val;
+                        YAHOO.log('Invalid value given for min: ' + val,'warn','FieldValidator');
+                        YAHOO.log(a,'warn','FieldValidator');
                     }
                     if (rtVl < (-1)*YW.FormValidator.MAX_INTEGER){
                         return (-1)*YW.FormValidator.MAX_INTEGER;
@@ -229,7 +226,7 @@ if (YAHOO.widget === null || YAHOO.widget === undefined){
                         rtVl = parseFloat(rtVl);
                     }
                     if (!YL.isNumber(rtVl)){
-                        throw 'Invalid value given for max: ' + val;
+                        YAHOO.log('Invalid value given for max: ' + val,'warn','FieldValidator');
                     }
                     if (rtVl > YW.FormValidator.MAX_INTEGER){
                         return YW.FormValidator.MAX_INTEGER;
@@ -251,7 +248,7 @@ if (YAHOO.widget === null || YAHOO.widget === undefined){
                         rtVl = parseInt(rtVl,10);
                     }
                     if (!YL.isNumber(rtVl)){
-                        throw 'Invalid value given for decimal places: ' + val;
+                        YAHOO.log('Invalid value given for decimal places: ' + val,'warn','FieldValidator');
                     }
                     else{
                         return val;
@@ -279,8 +276,18 @@ if (YAHOO.widget === null || YAHOO.widget === undefined){
                 setter:function(val){
                     return FieldValidator._initializeChecker('empty',val,FieldValidator.EmptyWhen);
                 }
+            },
+            /**
+             * If set, this will show that the input is considered optional, and if not filled
+             * in, won't cause the form to be invalid.
+             * @config optional
+             * @type boolean
+             */
+            optional:{
+                value:false,
+                setter:YW.FormValidator._setBoolean
             }
-        },
+        }
         /**
          * There is an entry for every type of input this form validator deals with that uses the INPUT tag.
          * For each entry is a function which will subscribe a validator object
@@ -288,22 +295,22 @@ if (YAHOO.widget === null || YAHOO.widget === undefined){
          * to the text inputs onkeyup event, as well as the onblur event.  While for a checkbox, it
          * would be the checkbox's onclick event.
          */
-        InputEventInitializers:{
-            checkbox:FieldValidator.DefaultInitializer._initializeClickEvent,
-            radio:FieldValidator.DefaultInitializer._initializeClickEvent,
-            text:FieldValidator.DefaultInitializer._initializeTextChangeEvents,
-            hidden:FieldValidator.DefaultInitializer._initializeTextChangeEvents,
-            password:FieldValidator.DefaultInitializer._initializeTextChangeEvents,
-            file:FieldValidator.DefaultInitializer._initializeChangeEvents
-        },
+//        InputEventInitializers:{
+//            checkbox:FieldValidator.DefaultInitializer._initializeClickEvent,
+//            radio:FieldValidator.DefaultInitializer._initializeClickEvent,
+//            text:FieldValidator.DefaultInitializer._initializeTextChangeEvents,
+//            hidden:FieldValidator.DefaultInitializer._initializeTextChangeEvents,
+//            password:FieldValidator.DefaultInitializer._initializeTextChangeEvents,
+//            file:FieldValidator.DefaultInitializer._initializeChangeEvents
+//        },
         /**
          * These are the same initializers as in inputEventInitializers, except for NON-INPUT tags
          * such as select and textarea.
          */
-        OtherEventInitializers:{
-            textarea:FieldValidator.DefaultInitializer._initializeTextChangeEvents,
-            select:FieldValidator.DefaultInitializer._initializeChangeEvents
-        }
+//        OtherEventInitializers:{
+//            textarea:FieldValidator.DefaultInitializer._initializeTextChangeEvents,
+//            select:FieldValidator.DefaultInitializer._initializeChangeEvents
+//        }
     });
     
     YL.extend(FieldValidator,YW.FormElement,{
@@ -311,10 +318,10 @@ if (YAHOO.widget === null || YAHOO.widget === undefined){
         /**
          * Based on the type of input given, this will initailize the change events on that input.
          */
-        _initializeEvents:function(){
-            var el = this.get('element'),type = el.getAttribute('type'),tagName = el.tagName.toLowerCase();
+        //_initializeEvents:function(){
+            /*var el = this.get('element'),type = el.getAttribute('type'),tagName = el.tagName.toLowerCase();
             if (tagName == 'input'){
-                if (type === null || type === undefined){
+                if (!type){
                     FieldValidator.DefaultInitializer._initializeTextChangeEvents(el,this);
                 }
                 else{
@@ -324,8 +331,8 @@ if (YAHOO.widget === null || YAHOO.widget === undefined){
             }
             else{
                 FieldValidator.OtherEventInitializers[tagName](el,this);
-            }            
-        },
+            }*/
+        //},
         
         /**
          * This function will initialize the configuration attributes of the validator for validation
@@ -333,14 +340,14 @@ if (YAHOO.widget === null || YAHOO.widget === undefined){
         _initializeValidator:function(){
             this._validator = this.get('type');
             this._empty = this.get('empty');
-            this._initializeEvents();
+            //this._initializeEvents();
         },
         /**
          * This is called when the input changes, this will determine which events
          * are fired from this validator
          */
         _evntOnChange:function(e){
-            this.checkStatus()
+            this.validate();
         },
         _getMetaWrapper:function(){
             var meta = {
@@ -354,34 +361,38 @@ if (YAHOO.widget === null || YAHOO.widget === undefined){
             };
             return meta;
         },
+        isEmpty:function(){
+            return this._getMetaWrapper()._empty(this.get('element'));
+        },
         /**
          * This will check the validity of the input
          * and throw the proper events based on the empty and validation functions.
          */
-        checkStatus:function(silent){
-            var isEmpty,isValid,el;
+        validate:function(silent){
+            var isEmpty,isValid,el,optional = this.get('optional');
             el = this.get('element');
             var meta = this._getMetaWrapper();
             isEmpty = meta._empty(el);
-            isValid = meta._validator(el);//this._validator(el);
+            isValid = meta._validator(el) || (isEmpty && optional);
+
             // if silent, don't invoke any events
             if (silent === true){
                 return isValid;
             }
             if (isEmpty){
-                this.fireEvent('inputEmpty',meta.errors);
+                this.fireEvent('inputEmpty',[meta.errors,this]);
             }
             else{
-                this.fireEvent('inputNotEmpty',meta.errors);
+                this.fireEvent('inputNotEmpty',[meta.errors,this]);
             }
 
             if (isValid){
-                this.fireEvent('inputValid',meta.errors);
+                this.fireEvent('inputValid',[meta.errors,this]);
             }
             else{
-                this.fireEvent('inputInvalid',meta.errors);
+                this.fireEvent('inputInvalid',[meta.errors,this]);
             }
-            this.fireEvent('inputValueChange',meta.errors);
+            this.fireEvent('inputValueChange',[meta.errors,this]);
             return isValid;
         },
         /**
@@ -420,8 +431,7 @@ if (YAHOO.widget === null || YAHOO.widget === undefined){
          */
         isValid:function(){
             var el = this.get('element');
-            return this.checkStatus(true);
-            //return this._validator(el);
+            return this.validate(true);
         }
     /**
          * Fires when the input is considered valid

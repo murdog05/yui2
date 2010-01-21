@@ -10,20 +10,28 @@
      */
     YL.augmentObject(YW.FormValidator,{
         FormEvents:{
-            notInRange:{
-                show:['numberOutOfRange'],
-                hide:['inputEmpty','numberInRange','incorrectFormat']
+            notInRange:function(){
+                return {
+                    show:['numberOutOfRange'],
+                    hide:['inputEmpty','numberInRange','incorrectFormat']
+                };
             },
-            valid:{
-                hide:['inputInvalid'],
-                show:['inputValid']
+            valid:function(){
+                return {
+                    hide:['inputInvalid'],
+                    show:['inputValid']
+                };
             },
-            invalid:{
-                show:['inputInvalid'],
-                hide:['inputValid']
+            invalid:function(){
+                return {
+                    show:['inputInvalid'],
+                    hide:['inputValid']
+                };
             },
-            all:{
-                show:['inputValueChange']
+            all:function(){
+                return {
+                    show:['inputValueChange']
+                };
             }
         }
     });
@@ -33,8 +41,12 @@
      */
     YL.augmentObject(YW.FormValidator,{
         Indicators:{
-            correct:{className:'indicator'},
-            incorrect:{className:'validator'}
+            correct:function(){
+                return {className:'indicator'};
+            },
+            incorrect:function(){
+                return {className:'validator'};
+            }
         }
     });
 
@@ -44,10 +56,6 @@
      * the field is invalid, or when the number value in the field is out of the specified range.
      */
     function FieldIndicator(el,config){
-//        if ((config !== null) && (config !== undefined) && YL.isFunction(config.formatter)){
-//            this.formatter = config.formatter;
-//            alert(this.formatter);
-//        }
         FieldIndicator.superclass.constructor.apply(this,arguments);
     }
     YL.augmentObject(FieldIndicator,{
@@ -57,13 +65,13 @@
                     fieldIndicator.get('element').style.display = '';
                 },
                 setter:function(val){
-                    if (val === null || val === undefined){
+                    if (!val){
                         return function(fieldValidator,fieldIndicator,meta) {
                             fieldIndicator.get('element').style.display = '';
                         };
                     }
                     if (!YL.isFunction(val)){
-                        throw 'FieldIndicator formatter must be a function';
+                        YAHOO.log('FieldIndicator formatter must be a function','warn','FieldValidator');
                     }
                     return val;
                 }
@@ -92,15 +100,20 @@
         /**
          * This will show the indicator
          */
-        show:function(errorMeta,validator){
-            var formatter = this.get('formatter');
-            formatter(validator,this,errorMeta);
+        show:function(args,formValidator){
+            var formatter = this.get('formatter'), errorMeta = args[0],validator = args[1];
+            // indicators will never show if the field is optional and empty
+            if (validator.get('optional') && validator.isEmpty()){
+                this.hide();
+            }
+            else{
+                formatter.call(formValidator,validator,this,errorMeta);
+            }
         },
         /**
          * This will hide the indicator.
          */
-        hide:function(eventName,validator){
-            //console.debug('hide ' + this.get('element').id);
+        hide:function(args,formValidator){
             this.setStyle('display','none');
         }
     });
