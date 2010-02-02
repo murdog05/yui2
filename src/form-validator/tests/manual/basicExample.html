@@ -42,6 +42,7 @@
                                 invalid:[
                                     {el:'ageIncorrect'},
                                     {
+                                        style:{tagType:'SPAN'},
                                         formatter:function(fieldValidator,fieldIndicator,meta){
                                             var el = fieldIndicator.get('element'),belowMin = meta.numberBelowMin, aboveMax = meta.numberAboveMax;
                                             if (belowMin !== null && belowMin !== undefined){
@@ -94,8 +95,8 @@
                         vehicle:{
                             validation:function(el){return el.value !== 'none';},
                             indicators:{
-                                invalid:new YAHOO.widget.FieldIndicator('vehicleIncorrect'),
-                                valid:new YAHOO.widget.FieldIndicator('vehicleCorrect')
+                                invalid:new YAHOO.widget.FieldIndicator('vehicle',{el:'vehicleIncorrect'}),
+                                valid:new YAHOO.widget.FieldIndicator('vehicle',{el:'vehicleCorrect'})
                             }
                         },
                         pet:{
@@ -116,23 +117,6 @@
                         }
                     }
                 });
-
-                var temp = {
-                    validation:'text',
-                    indicators:{
-                        valid:'correctIndicator',
-                        invalid:'incorrectIndicator'
-                    }
-                }
-                var temp2 = {
-                    validation:'text',
-                    indicators:{
-                        
-                    }
-                }
-                //YAHOO.util.Event.addListener('clearButton','click',function(){form.clear()});
-                //alert(document.getElementById('firstName').tagName);
-
             }            
         </script>
     </head>

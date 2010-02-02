@@ -227,22 +227,24 @@
             }
         },
         _initializeIndicator:function(eventSetting,fieldValidator,indJson){
-            var indicator,curIndJson = indJson,indicatorEl,events = FormValidator.FormEvents[eventSetting].call();
+            var indicator,events = FormValidator.FormEvents[eventSetting].call();
             if (indJson instanceof YW.FieldIndicator){
-                indicator = curIndJson;
-            //events = indicator.get('events');
+                indicator = indJson;
             }
             else{
-                // Possibly could detect leading # sign and take it as an id... not sure
-                // how events would work though
-                if (YL.isString(curIndJson)){
-                    curIndJson = FormValidator.Indicators[curIndJson].call();
-                }
-                // create the el from the JSON markup, don't touch the JSON markup
-                // because it may be re-used later.
-                indicatorEl = this._setupDomItem(curIndJson.el,fieldValidator.get('element'),curIndJson);
-                indicator = new YW.FieldIndicator(indicatorEl,curIndJson);
+                indicator = new YW.FieldIndicator(fieldValidator.get('element'),indJson)
             }
+//            else{
+//                // Possibly could detect leading # sign and take it as an id... not sure
+//                // how events would work though
+//                if (YL.isString(curIndJson)){
+//                    curIndJson = FormValidator.Indicators[curIndJson].call();
+//                }
+//                // create the el from the JSON markup, don't touch the JSON markup
+//                // because it may be re-used later.
+//                indicatorEl = this._setupDomItem(curIndJson.el,fieldValidator.get('element'),curIndJson);
+//                indicator = new YW.FieldIndicator(indicatorEl,curIndJson);
+//            }
             this._registerIndicators(fieldValidator,indicator,events);
             this._indicators.push(indicator);
         },

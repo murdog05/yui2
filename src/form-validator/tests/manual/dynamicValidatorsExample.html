@@ -14,6 +14,16 @@
         <script type="text/javascript" src="../../js/field-indicator.js"></script>
         <script type="text/javascript">
             window.onload = function() {
+                YAHOO.widget.FieldIndicator.DefaultStyle.incorrect = {
+                    tagType:'SPAN',
+                    className:'validator',
+                    html:'&nbsp;'
+                };
+                YAHOO.widget.FieldIndicator.DefaultStyle.correct = {
+                    tagType:'SPAN',
+                    className:'indicator',
+                    html:'&nbsp;'
+                };
                 var form = new YAHOO.widget.FormValidator('basicExample1',{
                     defaultSettings:{
                         indicator:{
@@ -139,7 +149,7 @@
                         <div class="clearDiv"></div>
                     </div>
                     <div id="incomeRange">
-                        
+
                     </div>
                     <div class="row">
                         <div class="column1Backing"></div>
