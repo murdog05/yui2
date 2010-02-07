@@ -95,8 +95,8 @@
                         vehicle:{
                             validation:function(el){return el.value !== 'none';},
                             indicators:{
-                                invalid:new YAHOO.widget.FieldIndicator('vehicle',{el:'vehicleIncorrect'}),
-                                valid:new YAHOO.widget.FieldIndicator('vehicle',{el:'vehicleCorrect'})
+                                invalid:new YAHOO.widget.FieldIndicator({el:'vehicleIncorrect'}),
+                                valid:new YAHOO.widget.FieldIndicator({el:'vehicleCorrect'})
                             }
                         },
                         pet:{

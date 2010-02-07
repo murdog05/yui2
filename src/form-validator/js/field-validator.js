@@ -15,6 +15,7 @@
 /**
  * This will house the validation function which
  * will perform the validation on the input field from the form.
+ * @namespace YAHOO.widget
  */
 (function()
 {
@@ -23,40 +24,54 @@
     YU = Y.util,
     YW = Y.widget,
     YD = YU.Dom
+    /**
+     * The field validator class is
+     * @class FieldValidator
+     * @constructor
+     * @param {HTMLElement} el The input element the field validator is for.
+     * @param {Object|String|Function} config Configuration for the validation
+     */
     function FieldValidator(el,config){
-        FieldValidator.superclass.constructor.apply(this,arguments);
+        FieldValidator.superclass.constructor.apply(this,[el,FieldValidator._initConfig(config)]);
         this._initializeValidator();
     }    
 
     YL.augmentObject(FieldValidator,{
-//        DefaultInitializer:{
-//            /**
-//             * This will initialize the events on the el as if it where
-//             * a text input
-//             */
-//            _initializeTextChangeEvents:function(el,validator){
-//                YU.Event.on(el,'keyup',validator._evntOnChange,validator,true);
-//                YU.Event.on(el,'blur',validator._evntOnChange,validator,true);
-//            },
-//            /**
-//             * This will initialize the change event to be fired when
-//             * the input is clicked
-//             */
-//            _initializeClickEvent:function(el,validator){
-//                YU.Event.on(el,'click',validator._evntOnChange,validator,true);
-//            },
-//            /**
-//             * This will initialize the change event to be fired when the change
-//             * event on the dom is fired.
-//             */
-//            _initializeChangeEvents:function(el,validator){
-//                YU.Event.on(el,'change',validator._evntOnChange,validator,true);
-//            }
-//        },
+        /**
+         * Given a configuration that could be a string, function or a configuration object,
+         * this will ensure a proper configuration object is returned and passed to the super class.
+         * @method _initConfig
+         * @param {Object|String|Function} config Configuration for the field validation
+         * @return {Object} configuration object for the field validation.
+         */
+        _initConfig:function(config){
+            var oConfig;
+            // if all that is given is a function or a string, then we put it as the type in a configuration object
+            // and initialize from there.
+            if (YL.isFunction(config) || YL.isString(config)){
+                oConfig = {
+                    type:config
+                };
+            }
+            else if (YL.isObject(config)){
+                // otherwise, we assume its an object, and
+                oConfig = config;
+            }
+            else{
+                YAHOO.log('Invalid configuration provided for form element.  Must provide string, function or configuration object.','warn','FieldValidator');
+                oConfig = {};
+            }
+            return oConfig;
+        },
         /**
          * This will initialize any property that is considered a checker.  A checker
          * is a function that will cause an event to happen based on its return value.
          * A checker function will always return a boolean value
+         * @method _initializeChecker
+         * @param {String} key Key value to say what type of checker (is valid or is empty) this is for, whether it be checking the validity of the input or if its empty
+         * @param {String} val Value under the key, for instance, is valid checker, checking to ensure the input is a valid number
+         * @param {String} map Map that contains the checkers the key and value will be used with.
+         * @return {function} function that will return a boolean value based on a single input.
          */
         _initializeChecker:function(key,val,map){
             var checker = val,temp,regex;
@@ -84,7 +99,12 @@
             return checker;
         },
         /**
-         * Premade validator functions that cover most validation situations.
+         * Premade validator functions that cover most validation situations.  These
+         * functions are used when a text value is provided for the type of validation.  Supported
+         * types are, text, integer, double, email, checked, and unchecked.
+         * @property Validators
+         * @static
+         * @type Object
          */
         Validators:{
             integer:function(el){
@@ -98,8 +118,12 @@
                     this.addError('incorrectFormat','Format of number is incorrect')
                     return false; // don't allow numbers with decimals
                 }
-                try{theVal = parseInt(value,10);}
-                catch(e){return false;}
+                try{
+                    theVal = parseInt(value,10);
+                }
+                catch(e){
+                    return false;
+                }
 
                 if ( theVal.toString().toLowerCase() == 'nan' ){
                     this.addError('incorrectFormat','Format of number is incorrect')
@@ -122,8 +146,12 @@
                     this.addError('incorrectFormat','Format of double is incorrect')
                     return false;
                 }                
-                try{numVal = parseFloat(value,10);}
-                catch(e){return false;}
+                try{
+                    numVal = parseFloat(value,10);
+                }
+                catch(e){
+                    return false;
+                }
 
                 if (!numVal.toString()){
                     this.addError('incorrectFormat','Format of double is incorrect')
@@ -154,6 +182,9 @@
         /**
          * Premade functions that specify when an input is considered empty.
          * More can be added, as well as the existing one overridden.
+         * @property EmptyWhen
+         * @static
+         * @type Object
          */
         EmptyWhen:{
             notext:function(el){
@@ -162,193 +193,148 @@
         }
     });
 
-    YL.augmentObject(FieldValidator,{
-        ATTRS:{
+    YL.extend(FieldValidator,YU.Element,{
+        /**
+         * Validator function to be used to check if the value in the input field
+         * is valid.
+         * @property _validator
+         * @type function
+         * @private
+         */
+        _validator:null,
+        /**
+         * Implementation of Element's abstract method. Sets up config values.
+         *
+         * @method initAttributes
+         * @param config {Object} (Optional) Object literal definition of configuration values.
+         * @private
+         */
+        initAttributes:function(config){
+            var oConfigs = config || {};
+            FieldValidator.superclass.initAttributes.call(this, oConfigs);
+
             /**
              * This is only for a group input.  For a group type input
              * the children will be used to determine the validity of the input.
+             * @config children
+             * @type Object[]
              */
-            children:{
-                value:null
-            },
+            this.setAttributeConfig('children',{
+                value:[],
+                validator:YL.isArray
+            });
             /**
              * This is set to true if the minimum allowed values boundary is inclusive
              * @config minInclusive
              * @type boolean
              */
-            minInclusive:{
+            this.setAttributeConfig('minInclusive',{
                 value:true,
-                setter:YW.FormValidator._setBoolean
-            },
+                validator:YL.isBoolean
+            });
             /**
              * This is set to true if the maximum allowed values boundary is inclusive
              * @config maxInclusive
              * @type boolean
              */
-            maxInclusive:{
+            this.setAttributeConfig('maxInclusive',{
                 value:true,
-                setter:YW.FormValidator._setBoolean
-            },
+                validator:YL.isBoolean
+            });
             /**
              * This is the minimum allowed value in the double field.  Default value
              * is the minimum value for an integer
              * @config min
              * @type number
              */
-            min:{
+            this.setAttributeConfig('min',{
                 value:0,
+                validator:YL.isNumber,
                 setter:function(val){
-                    var rtVl = val;
-                    if (!YL.isNumber(rtVl)){
-                        rtVl = parseFloat(rtVl);
-                    }
-                    if (!YL.isNumber(rtVl)){
-                        YAHOO.log('Invalid value given for min: ' + val,'warn','FieldValidator');
-                        YAHOO.log(a,'warn','FieldValidator');
-                    }
-                    if (rtVl < (-1)*YW.FormValidator.MAX_INTEGER){
+                    if (val < (-1)*YW.FormValidator.MAX_INTEGER){
                         return (-1)*YW.FormValidator.MAX_INTEGER;
                     }
-                    return rtVl;
+                    return val;
                 }
-            },
+            });
             /**
              * This is the maximum allowed value in the double field. Default value
              * is the maximum value for an integer
              * @config max
              * @type number
              */
-            max:{
-                value:YW.FormValidator.MAX_INTEGER,
+            this.setAttributeConfig('max',{
+                value:0,
+                validator:YL.isNumber,
                 setter:function(val){
-                    var rtVl = val;
-                    if (!YL.isNumber(rtVl)){
-                        rtVl = parseFloat(rtVl);
+                    if (val < (-1)*YW.FormValidator.MAX_INTEGER){
+                        return (-1)*YW.FormValidator.MAX_INTEGER;
                     }
-                    if (!YL.isNumber(rtVl)){
-                        YAHOO.log('Invalid value given for max: ' + val,'warn','FieldValidator');
-                    }
-                    if (rtVl > YW.FormValidator.MAX_INTEGER){
-                        return YW.FormValidator.MAX_INTEGER;
-                    }
-                    return rtVl;
+                    return val;
                 }
-            },
+            });
             /**
              * If set, this will restrict the number of decimal places allowed on the double.  This could
              * be done with regular expression, but this makes it a bit easier for everyone.
              * @config maxDecimalPlaces
              * @type number
              */
-            maxDecimalPlaces:{
+            this.setAttributeConfig('maxDecimalPlaces',{
                 value:-1,
-                setter:function(val){
-                    var rtVl = val;
-                    if (!YL.isNumber(rtVl)){
-                        rtVl = parseInt(rtVl,10);
-                    }
-                    if (!YL.isNumber(rtVl)){
-                        YAHOO.log('Invalid value given for decimal places: ' + val,'warn','FieldValidator');
-                    }
-                    else{
-                        return val;
-                    }
-                }
-            },
+                validator:YL.isNumber
+            });
             /**
              * This is the type of validation, text is set by default
              * @config type
              * @type function
              */
-            type:{
+            this.setAttributeConfig('type',{
                 value:'text',
                 setter:function(val){
                     return FieldValidator._initializeChecker('type',val,FieldValidator.Validators);
                 }
-            },
+            });
+            this.set('type','text');
             /**
              * This is the type of validation, text is set by default
              * @config empty
              * @type empty
              */
-            empty:{
+            this.setAttributeConfig('empty',{
                 value:'notext',
                 setter:function(val){
                     return FieldValidator._initializeChecker('empty',val,FieldValidator.EmptyWhen);
                 }
-            },
+            });
+            this.set('empty','notext');
             /**
              * If set, this will show that the input is considered optional, and if not filled
              * in, won't cause the form to be invalid.
              * @config optional
              * @type boolean
              */
-            optional:{
+            this.setAttributeConfig('optional',{
                 value:false,
-                setter:YW.FormValidator._setBoolean
-            }
-        }
-        /**
-         * There is an entry for every type of input this form validator deals with that uses the INPUT tag.
-         * For each entry is a function which will subscribe a validator object
-         * to the proper events of the input.  For example, a validator will be subscribe
-         * to the text inputs onkeyup event, as well as the onblur event.  While for a checkbox, it
-         * would be the checkbox's onclick event.
-         */
-//        InputEventInitializers:{
-//            checkbox:FieldValidator.DefaultInitializer._initializeClickEvent,
-//            radio:FieldValidator.DefaultInitializer._initializeClickEvent,
-//            text:FieldValidator.DefaultInitializer._initializeTextChangeEvents,
-//            hidden:FieldValidator.DefaultInitializer._initializeTextChangeEvents,
-//            password:FieldValidator.DefaultInitializer._initializeTextChangeEvents,
-//            file:FieldValidator.DefaultInitializer._initializeChangeEvents
-//        },
-        /**
-         * These are the same initializers as in inputEventInitializers, except for NON-INPUT tags
-         * such as select and textarea.
-         */
-//        OtherEventInitializers:{
-//            textarea:FieldValidator.DefaultInitializer._initializeTextChangeEvents,
-//            select:FieldValidator.DefaultInitializer._initializeChangeEvents
-//        }
-    });
-    
-    YL.extend(FieldValidator,YW.FormElement,{
-        _validator:null,
-        /**
-         * Based on the type of input given, this will initailize the change events on that input.
-         */
-        //_initializeEvents:function(){
-            /*var el = this.get('element'),type = el.getAttribute('type'),tagName = el.tagName.toLowerCase();
-            if (tagName == 'input'){
-                if (!type){
-                    FieldValidator.DefaultInitializer._initializeTextChangeEvents(el,this);
-                }
-                else{
-                    type = type.toLowerCase();
-                    FieldValidator.InputEventInitializers[type](el,this);
-                }
-            }
-            else{
-                FieldValidator.OtherEventInitializers[tagName](el,this);
-            }*/
-        //},
-        
+                validator:YL.isBoolean
+            });
+        },
         /**
          * This function will initialize the configuration attributes of the validator for validation
+         * @method _initializeValidator
+         * @private
          */
         _initializeValidator:function(){
             this._validator = this.get('type');
             this._empty = this.get('empty');
-            //this._initializeEvents();
         },
         /**
-         * This is called when the input changes, this will determine which events
-         * are fired from this validator
+         * This will return an object that will operate as the scope for the
+         * validation function to execute in.  This will provide the ability to
+         * store an error message under a key, as well as access the validator
+         * and the input.
+         * @method _getMetaWrapper
+         * @return {Object} meta object the validation and empty functions operate in.
          */
-        _evntOnChange:function(e){
-            this.validate();
-        },
         _getMetaWrapper:function(){
             var meta = {
                 errors:{},
@@ -361,12 +347,21 @@
             };
             return meta;
         },
+        /**
+         * This will return true if the input is empty.  By default this will
+         * return true if the value in the input field is ''.
+         * @method isEmpty
+         * @return {boolean} true if the value is considered empty by the empty function used.
+         */
         isEmpty:function(){
             return this._getMetaWrapper()._empty(this.get('element'));
         },
         /**
          * This will check the validity of the input
          * and throw the proper events based on the empty and validation functions.
+         * @method validate
+         * @param {boolean} silent If true, the validator will not fire any events.
+         * @return {boolean} true if the input is considered valid.
          */
         validate:function(silent){
             var isEmpty,isValid,el,optional = this.get('optional');
@@ -396,8 +391,12 @@
             return isValid;
         },
         /**
-         * used only for numbers, this will check the range and fire
+         * Used only for numbers, this will check the range and fire
          * a value out of range event if the value is out of range.
+         * @method _checkRange
+         * @param {number} numVal Numeric value to be checked.
+         * @param {Object} errorMeta Meta object that is used to store errors.
+         * @return {boolean} true if the number is in the range specified on the validator.
          */
         _checkRange:function(numVal,errorMeta){
             var minInclusive,maxInclusive,min,max;
@@ -406,19 +405,27 @@
             min = this.get('min');
             max = this.get('max');            
             if (minInclusive && (min > numVal)){
-                errorMeta.addError('numberBelowMin',{min:min});
+                errorMeta.addError('numberBelowMin',{
+                    min:min
+                });
                 return false;
             }
             else if (!minInclusive && (min >= numVal)){
-                errorMeta.addError('numberBelowMin',{min:min});
+                errorMeta.addError('numberBelowMin',{
+                    min:min
+                });
                 return false;
             }
             else if (maxInclusive && (max < numVal)){
-                errorMeta.addError('numberAboveMax',{max:max});
+                errorMeta.addError('numberAboveMax',{
+                    max:max
+                });
                 return false;
             }
             else if (!maxInclusive && (max <= numVal)){
-                errorMeta.addError('numberAboveMax',{max:max});
+                errorMeta.addError('numberAboveMax',{
+                    max:max
+                });
                 return false;
             }
             else{
@@ -428,35 +435,30 @@
         /**
          * This will return true if the input represented by this validator
          * is valid.
+         * @method isValid
+         * @return {boolean} true if the input is valid based on the configuration.
          */
         isValid:function(){
             var el = this.get('element');
             return this.validate(true);
         }
-    /**
-         * Fires when the input is considered valid
+        /**
+         * Fires when the input is considered valid, always fired after the empty/not empty events.
          * @event inputValid
          */
-    /**
-         * Fires when the input is considered invalid
+        /**
+         * Fires when the input is considered invalid, always fired after the empty/not empty events.
          * @event inputInvalid
          */
-    /**
-         * Fires when the input is considered empty
+        /**
+         * Fires when the input is considered empty, always fired before the valid/invalid events.
          * @event inputEmpty
          */
-    /**
-         * Fires when the input is considered non-empty
+        /**
+         * Fires when the input is considered non-empty, always fired before the valid/invalid events.
          * @event inputNotEmpty
-         */
-        /**
-         * Can be fired by the validation function to state that a number comparison is out of range
-         * @event numberOutOfRange
-         */
-        /**
-         * Can be fired by the text input to state that the given text is too long
-         * @event textTooLong
          */
     });
     YAHOO.widget.FieldValidator = FieldValidator;
+    YW.FormValidator.FieldValidator = FieldValidator;
 })();

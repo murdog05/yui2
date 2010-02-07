@@ -6,7 +6,7 @@
     function FormButton(el,config){
         FormButton.superclass.constructor.apply(this,arguments);
     }
-    Y.extend(FormButton,YAHOO.util.Element,{
+    Y.extend(FormButton,YU.Element,{
         /**
          * This will enable the button
          * @method enable
