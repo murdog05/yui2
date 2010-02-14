@@ -161,10 +161,10 @@
             YU.Event.on(el,'reset',this._onFormReset,this,true);
             
             // When input values are changed
-            YU.Event.on(el,'keyup',this._onFormInteraction,this,true);
-            YU.Event.on(el,'blur',this._onFormInteraction,this,true);
-            YU.Event.on(el,'click',this._onFormInteraction,this,true);
-            YU.Event.on(el,'change',this._onFormInteraction,this,true);
+            YU.Event.delegate(el,'keyup',this._onFormInteraction,function(element){return element;},this,true);
+            YU.Event.delegate(el,'blur',this._onFormInteraction,function(element){return element;},this,true);
+            YU.Event.delegate(el,'click',this._onFormInteraction,function(element){return element;},this,true);
+            YU.Event.delegate(el,'change',this._onFormInteraction,function(element){return element;},this,true);
         },
         /**
          * This will take all submit buttons, wrap them in a button object
@@ -262,10 +262,12 @@
          * in anyway, this will obtain the target, and delegate the event if the
          * target is a form input.
          * @method _onFormInteraction
-         * @param {Object} evt Event that caused any of the form change events to fire.
+         * @param {Object} event Event that caused any of the form change events to fire.
+         * @param {HTMLElement} matchedEl Element that was the target of the form interaction
+         * @param {HTMLElement} container Element container the delegate is listening on that contains the matched El
          */
-        _onFormInteraction:function(evt){
-            var event = evt || window.event,target = event.target || event.srcElement,validator = this.getValidatorByInput(target);
+        _onFormInteraction:function(event,matchedEl,container){
+            var validator = this.getValidatorByInput(matchedEl);
             if (validator){
                 validator.validate();
                 this._onFormChange();

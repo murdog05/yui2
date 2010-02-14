@@ -296,5 +296,7 @@
         }
     });
     YW.FieldIndicator = FieldIndicator;
-    YW.FormValidator.FieldIndicator = FieldIndicator;
+    if (YW.FormValidator){
+        YW.FormValidator.FieldIndicator = FieldIndicator;
+    }
 })();
