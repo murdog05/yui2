@@ -38,6 +38,34 @@
 
     YL.augmentObject(FieldValidator,{
         /**
+         * The maximum value for an integer.  Used as a default min/max value on number fields
+         * @property MAX_INTEGER
+         * @type number
+         * @static
+         */
+        MAX_INTEGER:2147483647,
+        /**
+         * Regular expression used by the Integer field for ensuring the input matches the format of an integer
+         * @property INTEGERREGEX
+         * @type regex
+         * @static
+         */
+        INTEGERREGEX:/(^-?\d\d*\.\d*$)|(^-?\d\d*$)|(^-?\.\d\d*$)/,
+        /**
+         * Regular expression used by the DoubleField for ensuring the input matches the format of an double
+         * @property DOUBLEREGEX
+         * @type regex
+         * @static
+         */
+        DOUBLEREGEX:/(^-?\d\d*\.\d+$)|(^-?\d\d*$)|(^-?\.\d\d*$)/,
+        /**
+         * Regular expression for an e-mail.
+         * @property EMAILREGEX
+         * @type regex
+         * @static
+         */
+        EMAILREGEX:/^([a-zA-Z0-9_\.\-])+\@(([a-zA-Z0-9\-])+\.)+([a-zA-Z0-9]{2,4})+$/,
+        /**
          * Given a configuration that could be a string, function or a configuration object,
          * this will ensure a proper configuration object is returned and passed to the super class.
          * @method _initConfig
@@ -109,7 +137,7 @@
         Validators:{
             integer:function(el){
                 var value = el.value,theVal;
-                if (!YW.FormValidator.INTEGERREGEX.test(value)){
+                if (!FieldValidator.INTEGERREGEX.test(value)){
                     //this.fireEvent('incorrectFormat');
                     this.addError('incorrectFormat','Format of number is incorrect')
                     return false;
@@ -142,7 +170,7 @@
                         return false;
                     }
                 }
-                if (!YW.FormValidator.DOUBLEREGEX.test(el.value)){
+                if (!YW.FieldValidator.DOUBLEREGEX.test(el.value)){
                     this.addError('incorrectFormat','Format of double is incorrect')
                     return false;
                 }                
@@ -170,7 +198,7 @@
             },
             email:function(el){
                 // TODO: Put in length checking
-                return YW.FormValidator.EMAILREGEX.test(el.value);
+                return YW.FieldValidator.EMAILREGEX.test(el.value);
             },
             checked:function(el){
                 return el.checked;
@@ -248,11 +276,11 @@
              * @type number
              */
             this.setAttributeConfig('min',{
-                value:0,
+                value:(-1)*YW.FieldValidator.MAX_INTEGER,
                 validator:YL.isNumber,
                 setter:function(val){
-                    if (val < (-1)*YW.FormValidator.MAX_INTEGER){
-                        return (-1)*YW.FormValidator.MAX_INTEGER;
+                    if (val < (-1)*YW.FieldValidator.MAX_INTEGER){
+                        return (-1)*YW.FieldValidator.MAX_INTEGER;
                     }
                     return val;
                 }
@@ -264,11 +292,11 @@
              * @type number
              */
             this.setAttributeConfig('max',{
-                value:0,
+                value:YW.FieldValidator.MAX_INTEGER,
                 validator:YL.isNumber,
                 setter:function(val){
-                    if (val < (-1)*YW.FormValidator.MAX_INTEGER){
-                        return (-1)*YW.FormValidator.MAX_INTEGER;
+                    if (val < (-1)*YW.FieldValidator.MAX_INTEGER){
+                        return (-1)*YW.FieldValidator.MAX_INTEGER;
                     }
                     return val;
                 }
@@ -324,8 +352,9 @@
          * @private
          */
         _initializeValidator:function(){
-            this._validator = this.get('type');
-            this._empty = this.get('empty');
+//            this._validator = this.get('type');
+//            this._empty = this.get('empty');
+            //alert(this._m)
         },
         /**
          * This will return an object that will operate as the scope for the
@@ -342,8 +371,8 @@
                 addError:function(key,msg){
                     this.errors[key] = msg;
                 },
-                _validator:this._validator,
-                _empty:this._empty
+                _validator:this.get('type'),
+                _empty:this.get('empty')
             };
             return meta;
         },
@@ -369,7 +398,6 @@
             var meta = this._getMetaWrapper();
             isEmpty = meta._empty(el);
             isValid = meta._validator(el) || (isEmpty && optional);
-
             // if silent, don't invoke any events
             if (silent === true){
                 return isValid;
@@ -403,7 +431,7 @@
             minInclusive = this.get('minInclusive');
             maxInclusive = this.get('maxInclusive');
             min = this.get('min');
-            max = this.get('max');            
+            max = this.get('max');
             if (minInclusive && (min > numVal)){
                 errorMeta.addError('numberBelowMin',{
                     min:min
@@ -460,5 +488,7 @@
          */
     });
     YAHOO.widget.FieldValidator = FieldValidator;
-    YW.FormValidator.FieldValidator = FieldValidator;
+    if (YW.FormValidator){
+        YW.FieldValidator.FieldValidator = FieldValidator;
+    }
 })();

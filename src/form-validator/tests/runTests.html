@@ -16,9 +16,11 @@
         <!-- Include the test suite -->
         <script type="text/javascript" src="form-button-test.js"></script>
         <script type="text/javascript" src="field-indicator-test.js"></script>
+        <script type="text/javascript" src="field-validator-test.js"></script>
 
         <script type="text/javascript" src="../js/form-button.js"></script>
         <script type="text/javascript" src="../js/field-indicator.js"></script>
+        <script type="text/javascript" src="../js/field-validator.js"></script>
         <script type="text/javascript">
             YAHOO.util.Event.onDOMReady(function (){
 
@@ -28,13 +30,20 @@
                 //add the test suite to the runner's queue
                 YAHOO.tool.TestRunner.add(YW.formValidatorTests.buttonTestCase);
                 YAHOO.tool.TestRunner.add(YW.formValidatorTests.fieldIndicatorTestCase);
+                YAHOO.tool.TestRunner.add(YW.formValidatorTests.fieldValidatorTestCase);
 
                 //run the tests
+                YAHOO.util.Event.on('runTestsButton','click',function(){
+                    YAHOO.tool.TestRunner.run();
+                });
                 YAHOO.tool.TestRunner.run();
             });
         </script>
     </head>
     <body class="yui-skin-sam" style="font-size:12pt;">
+        <div id="runTestsButtonDiv" style="position:absolute;z-index:10000;right:1em;top:.9em;">
+            <input type="button" id="runTestsButton" value="Run tests" />
+        </div>
         <div id="testLogger"></div>
     </body>
 </html>

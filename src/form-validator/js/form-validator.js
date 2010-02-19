@@ -18,37 +18,7 @@
         FormValidator.superclass.constructor.apply(this,arguments);
         this._init(config)
     }
-
-    YL.augmentObject(FormValidator,{
-        /**
-         * The maximum value for an integer.  Used as a default min/max value on number fields
-         * @property MAX_INTEGER
-         * @type number
-         * @static
-         */
-        MAX_INTEGER:2147483647,
-        /**
-         * Regular expression used by the Integer field for ensuring the input matches the format of an integer
-         * @property INTEGERREGEX
-         * @type regex
-         * @static
-         */
-        INTEGERREGEX:/(^-?\d\d*\.\d*$)|(^-?\d\d*$)|(^-?\.\d\d*$)/,
-        /**
-         * Regular expression used by the DoubleField for ensuring the input matches the format of an double
-         * @property DOUBLEREGEX
-         * @type regex
-         * @static
-         */
-        DOUBLEREGEX:/(^-?\d\d*\.\d+$)|(^-?\d\d*$)|(^-?\.\d\d*$)/,
-        /**
-         * Regular expression for an e-mail.
-         * @property EMAILREGEX
-         * @type regex
-         * @static
-         */
-        EMAILREGEX:/^([a-zA-Z0-9_\.\-])+\@(([a-zA-Z0-9\-])+\.)+([a-zA-Z0-9]{2,4})+$/
-    });
+    
     Y.extend(FormValidator,YU.Element,{
         /**
          * This will initialize the form validator
