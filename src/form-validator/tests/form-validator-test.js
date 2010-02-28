@@ -349,6 +349,33 @@ YL.augmentObject(YW.formValidatorTests,{
                 buttons:['formButton2']
             });
             Assert.areEqual(1,validator.buttons.length);
+        },
+        /**
+         * Test the form submission prevention if the form is invalid, or the
+         * before submit returns false.
+         */
+        testFormSubmit:function(){
+            var Assert = YAHOO.util.Assert,validator,allowSubmit = false,formSubmitted = false,formValid = false;
+            validator = new YW.FormValidator(this.hiddenDiv,{
+                inputs:{
+                    'test-text-input':{
+                        validation:function(){return formValid;}
+                    }
+                },
+                buttons:['formButton','formButton2'],
+                beforeSubmit:function(){
+                    return allowSubmit;
+                }
+            });
+            validator.on('formSubmit',function(){formSubmitted = true;});
+            validator.submit();
+            Assert.isFalse(formSubmitted);
+            formValid = true;
+            validator.submit();
+            Assert.isFalse(formSubmitted);
+            allowSubmit = true;
+            validator.submit();
+            Assert.isTrue(formSubmitted);
         }
     })
 });

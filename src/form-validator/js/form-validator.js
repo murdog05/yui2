@@ -51,11 +51,37 @@
                     return YL.isArray(val) || YL.isString(val) || YL.isObject(val);
                 }
             });
+            /**
+             * When set to true, this will scan the form for all submit buttons and register
+             * them with the form.  This is true by default
+             * @attribute findButtons
+             * @type boolean
+             */
             this.setAttributeConfig('findButtons',{
                 value:true,
                 validator:YL.isBoolean
             });
-            // does nothing at the moment.
+            /**
+             * This is the function that will get executed before the form
+             * is submitted if its valid.  This function may optionally return
+             * a boolean, and if that boolean is false, the form will not submit.
+             * @attribute beforeSubmit
+             * @type function
+             */
+            this.setAttributeConfig('beforeSubmit',{
+                value:function() {return true},
+                validator:YL.isFunction
+            });
+            /**
+             * Scope in which the before submit is called.
+             * @attribute beforeSubmitScope
+             * @type Object
+             */
+            this.setAttributeConfig('beforeSubmitScope',{
+                value:{},
+                validator:YL.isObject
+            });
+
         },
         /**
          * This will initialize the form validator
@@ -282,6 +308,26 @@
             this.fireEvent('onFormChange');
         },
         /**
+         * This will invoke the form's submit method.  If there is no submit method
+         * defined on the element el, then it will simply invoke on form submit.  This
+         * will only be done if the form is valid.
+         * @method submit
+         */
+        submit:function(){
+            if (!this.isValid()){
+                return;
+            }
+            var fn = this.get('beforeSubmit'),scope = this.get('beforeSubmitScope'),val = fn.call(scope),form = this.get('element');
+            if (val === false){
+                return;
+            }
+            this.fireEvent('formSubmit');
+            // submit the form.
+            if (form.submit){
+                form.submit();
+            }
+        },
+        /**
          * This function is called when the form is submitted.  If the form is
          * not valid, the submit event on the form is cancelled.
          */
@@ -290,9 +336,16 @@
                 YE.preventDefault(ev);
                 return;
             }
-            // later add the before submit function checks as well
-            // as the before submit event
-            this.fireEvent('onFormSubmit');
+            var fn = this.get('beforeSubmit'),scope = this.get('beforeSubmitScope'),val = fn.call(scope);
+            if (val === false){
+                YE.preventDefault(ev);
+                return;
+            }
+            /**
+             * This is fired when the form is submitted.
+             * @event formSubmit
+             */
+            this.fireEvent('formSubmit');
         },
         /**
          * This will be the event delgator.  Whenever a user interacts with the form
