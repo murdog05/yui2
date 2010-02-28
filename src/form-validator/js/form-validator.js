@@ -16,18 +16,55 @@
      */
     function FormValidator(el,config){
         FormValidator.superclass.constructor.apply(this,arguments);
-        this._init(config)
+        this._init()
     }
     
     Y.extend(FormValidator,YU.Element,{
+        /**
+         * Implementation of Element's abstract method. Sets up config values.
+         *
+         * @method initAttributes
+         * @param config {Object} (Optional) Object literal definition of configuration values.
+         * @private
+         */
+        initAttributes:function(config){
+            var oConfigs = config || {};
+            FormValidator.superclass.initAttributes.call(this, oConfigs);
+            /**
+             * This will hold the configuration for the inputs of the form
+             * @attribute inputs
+             * @type object
+             */
+            this.setAttributeConfig("inputs",{
+                value:null,
+                validator:YL.isObject
+            });
+            /**
+             * This will allow any button to be treated as as submit button on
+             * the form.
+             * @attribute buttons
+             * @type String[]
+             */
+            this.setAttributeConfig("buttons",{
+                value:null,
+                validator:function(val){
+                    return YL.isArray(val) || YL.isString(val) || YL.isObject(val);
+                }
+            });
+            this.setAttributeConfig('findButtons',{
+                value:true,
+                validator:YL.isBoolean
+            });
+            // does nothing at the moment.
+        },
         /**
          * This will initialize the form validator
          * @method _init
          * @param {Object} config Called by the constructor to initialize the inputs, buttons and events.
          */
-        _init:function(config){
+        _init:function(){
             this._initializeSubmitButtons();
-            this._initializeInputs(config);
+            this._initializeInputs();
             this._initializeEvents();
             this.updateForm();
         },
@@ -48,8 +85,8 @@
          * @method _initializeInputs
          * @param {Object} config Configuration object
          */
-        _initializeInputs:function(config){
-            var inputs = config.inputs,curInput,j,curIndsJson,inds,key,indicatorKey,el,inputCfg,ind;
+        _initializeInputs:function(){
+            var inputs = this.get('inputs'),curInput,j,curIndsJson,inds,key,indicatorKey,el,inputCfg,ind;
             this._validation = [];
             this._indicators = [];
             for (key in inputs){
@@ -143,16 +180,46 @@
          * @method _initializeSubmitButtons
          */
         _initializeSubmitButtons:function(){
-            var submitButtons = this._getSubmitButtons(this.get('element')),buttons = [],i,curButton;
-            // TODO: Check for buttons defined in the buttonJSON attribute, and ignore buttons
-            // already configured in there.
-            for (i = 0 ; i < submitButtons.length; ++i){
-                curButton = new YAHOO.widget.FormButton(submitButtons[i]);
-                buttons.push(curButton);
-                this.subscribe('formValid',curButton.enable,curButton,true);
-                this.subscribe('formInvalid',curButton.disable,curButton,true);
+            var submitButtons,i,button,configButtons = this.get('buttons'),tempHash = {};
+            this.buttons = [];
+            if (YL.isArray(configButtons)){
+                for (i = 0 ; i < configButtons.length; ++i){
+                    button = this._addButton(configButtons[i]);
+                    if (button.get('element').id != null){
+                        tempHash[button.get('element').id] = true;
+                    }
+                }
             }
-            this.set('buttons',buttons);
+            else if (configButtons){
+                button = this._addButton(configButtons);
+                if (button.get('element').id != null){
+                    tempHash[button.get('element').id] = true;
+                }
+            }
+
+            if (this.get('findButtons')){
+                submitButtons = this._getSubmitButtons(this.get('element'))
+                for (i = 0 ; i < submitButtons.length; ++i){
+                    // prevent duplicates
+                    if (!tempHash[submitButtons[i].id]){
+                        this._addButton(submitButtons[i]);
+                    }
+                }
+            }
+        },
+        /**
+         * Thils will add the given el to the form as a button which will be enabled
+         * when the form is valid, and disabled when the form is invalid.
+         * @method _addButton
+         * @param {HTMLElement|String} el
+         * @return {YAHOO.widget.FormButton newly created button
+         */
+        _addButton:function(el){
+            var button = new FormValidator.FormButton(el);
+            this.buttons.push(button);
+            this.subscribe('formValid',button.enable,button,true);
+            this.subscribe('formInvalid',button.disable,button,true);
+            return button;
         },
         /**
          * This will retreive all submit buttons that are inside of the Form element and return them.
@@ -270,5 +337,5 @@
             this.updateForm();
         }
     });
-    YAHOO.widget.FormValidator = FormValidator;
+    YW.FormValidator = FormValidator;
 })();

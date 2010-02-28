@@ -139,11 +139,11 @@
                 var value = el.value,theVal;
                 if (!FieldValidator.INTEGERREGEX.test(value)){
                     //this.fireEvent('incorrectFormat');
-                    this.addError('incorrectFormat','Format of number is incorrect')
+                    this.addMeta('incorrectFormat','Format of number is incorrect')
                     return false;
                 }
                 if ( value.indexOf( '.' ) != -1 ){
-                    this.addError('incorrectFormat','Format of number is incorrect')
+                    this.addMeta('incorrectFormat','Format of number is incorrect')
                     return false; // don't allow numbers with decimals
                 }
                 try{
@@ -154,7 +154,7 @@
                 }
 
                 if ( theVal.toString().toLowerCase() == 'nan' ){
-                    this.addError('incorrectFormat','Format of number is incorrect')
+                    this.addMeta('incorrectFormat','Format of number is incorrect')
                     return false;
                 }
                 else{
@@ -164,14 +164,14 @@
             'double':function(el){
                 var value = el.value,numVal = 0,maxDecimals = this._validation.get('maxDecimalPlaces'),decimals;
                 if ((maxDecimals != -1) && (value.indexOf('.') != -1)){
-                    this.addError('incorrectFormat','Format of double is incorrect')
+                    this.addMeta('incorrectFormat','Format of double is incorrect')
                     decimals = value.split('.')[1];
                     if (decimals.length > maxDecimals) {
                         return false;
                     }
                 }
                 if (!YW.FieldValidator.DOUBLEREGEX.test(el.value)){
-                    this.addError('incorrectFormat','Format of double is incorrect')
+                    this.addMeta('incorrectFormat','Format of double is incorrect')
                     return false;
                 }                
                 try{
@@ -182,11 +182,11 @@
                 }
 
                 if (!numVal.toString()){
-                    this.addError('incorrectFormat','Format of double is incorrect')
+                    this.addMeta('incorrectFormat','Format of double is incorrect')
                     return false;
                 }
                 if (numVal.toString().toLowerCase() == 'nan'){
-                    this.addError('incorrectFormat','Format of double is incorrect')
+                    this.addMeta('incorrectFormat','Format of double is incorrect')
                     return false;
                 }
                 return this._validation._checkRange(numVal,this);
@@ -366,10 +366,10 @@
          */
         _getMetaWrapper:function(){
             var meta = {
-                errors:{},
+                metaData:{},
                 _validation:this,
-                addError:function(key,msg){
-                    this.errors[key] = msg;
+                addMeta:function(key,msg){
+                    this.metaData[key] = msg;
                 },
                 _validator:this.get('type'),
                 _empty:this.get('empty')
@@ -396,26 +396,26 @@
             var isEmpty,isValid,el,optional = this.get('optional');
             el = this.get('element');
             var meta = this._getMetaWrapper();
-            isEmpty = meta._empty(el);
-            isValid = meta._validator(el) || (isEmpty && optional);
+            isEmpty = meta._empty(el,meta);
+            isValid = meta._validator(el,meta) || (isEmpty && optional);
             // if silent, don't invoke any events
             if (silent === true){
                 return isValid;
             }
             if (isEmpty){
-                this.fireEvent('inputEmpty',[meta.errors,this]);
+                this.fireEvent('inputEmpty',[meta.metaData,this]);
             }
             else{
-                this.fireEvent('inputNotEmpty',[meta.errors,this]);
+                this.fireEvent('inputNotEmpty',[meta.metaData,this]);
             }
 
             if (isValid){
-                this.fireEvent('inputValid',[meta.errors,this]);
+                this.fireEvent('inputValid',[meta.metaData,this]);
             }
             else{
-                this.fireEvent('inputInvalid',[meta.errors,this]);
+                this.fireEvent('inputInvalid',[meta.metaData,this]);
             }
-            this.fireEvent('inputValueChange',[meta.errors,this]);
+            this.fireEvent('inputValueChange',[meta.metaData,this]);
             return isValid;
         },
         /**
@@ -433,25 +433,25 @@
             min = this.get('min');
             max = this.get('max');
             if (minInclusive && (min > numVal)){
-                errorMeta.addError('numberBelowMin',{
+                errorMeta.addMeta('numberBelowMin',{
                     min:min
                 });
                 return false;
             }
             else if (!minInclusive && (min >= numVal)){
-                errorMeta.addError('numberBelowMin',{
+                errorMeta.addMeta('numberBelowMin',{
                     min:min
                 });
                 return false;
             }
             else if (maxInclusive && (max < numVal)){
-                errorMeta.addError('numberAboveMax',{
+                errorMeta.addMeta('numberAboveMax',{
                     max:max
                 });
                 return false;
             }
             else if (!maxInclusive && (max <= numVal)){
-                errorMeta.addError('numberAboveMax',{
+                errorMeta.addMeta('numberAboveMax',{
                     max:max
                 });
                 return false;
@@ -489,6 +489,6 @@
     });
     YAHOO.widget.FieldValidator = FieldValidator;
     if (YW.FormValidator){
-        YW.FieldValidator.FieldValidator = FieldValidator;
+        YW.FormValidator.FieldValidator = FieldValidator;
     }
 })();

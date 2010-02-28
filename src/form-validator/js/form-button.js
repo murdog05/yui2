@@ -2,6 +2,7 @@
     var Y = YAHOO,
     YL = Y.lang,
     YU = Y.util,
+    YW = Y.widget,
     YD = YU.Dom;
     function FormButton(el,config){
         FormButton.superclass.constructor.apply(this,arguments);
@@ -22,5 +23,8 @@
             this.get('element').disabled = true;
         }
     });
-    YAHOO.widget.FormButton = FormButton;
+    YW.FormButton = FormButton;
+    if (YW.FormValidator){
+        YW.FormValidator.FormButton = FormButton;
+    }
 })();

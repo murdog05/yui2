@@ -11,13 +11,16 @@
 
         <script type="text/javascript" src="http://yui.yahooapis.com/2.8.0r4/build/logger/logger-min.js"></script>
         <script type="text/javascript" src="http://yui.yahooapis.com/2.8.0r4/build/yuitest/yuitest-min.js"></script>
+        <script type="text/javascript" src="http://yui.yahooapis.com/2.8.0r4/build/event-delegate/event-delegate-min.js"></script>
         <script type="text/javascript" src="mocks.js"></script>
 
         <!-- Include the test suite -->
         <script type="text/javascript" src="form-button-test.js"></script>
         <script type="text/javascript" src="field-indicator-test.js"></script>
         <script type="text/javascript" src="field-validator-test.js"></script>
+        <script type="text/javascript" src="form-validator-test.js"></script>
 
+        <script type="text/javascript" src="../js/form-validator.js"></script>
         <script type="text/javascript" src="../js/form-button.js"></script>
         <script type="text/javascript" src="../js/field-indicator.js"></script>
         <script type="text/javascript" src="../js/field-validator.js"></script>
@@ -31,7 +34,7 @@
                 YAHOO.tool.TestRunner.add(YW.formValidatorTests.buttonTestCase);
                 YAHOO.tool.TestRunner.add(YW.formValidatorTests.fieldIndicatorTestCase);
                 YAHOO.tool.TestRunner.add(YW.formValidatorTests.fieldValidatorTestCase);
-
+                YAHOO.tool.TestRunner.add(YW.formValidatorTests.formValidatorTestCase);
                 //run the tests
                 YAHOO.util.Event.on('runTestsButton','click',function(){
                     YAHOO.tool.TestRunner.run();
