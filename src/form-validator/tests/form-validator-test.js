@@ -376,6 +376,34 @@ YL.augmentObject(YW.formValidatorTests,{
             allowSubmit = true;
             validator.submit();
             Assert.isTrue(formSubmitted);
+        },
+        testBeforeSubmitScope:function(){
+            var Assert = YAHOO.util.Assert,validator,allowSubmit = false,formSubmitted = false,formValid = false,
+            theScope = {beforeSubmitCalled:false};
+            validator = new YW.FormValidator(this.hiddenDiv,{
+                inputs:{
+                    'test-text-input':{
+                        validation:function(){return formValid;}
+                    }
+                },
+                buttons:['formButton','formButton2'],
+                beforeSubmit:function(){
+                    this.beforeSubmitCalled = true;
+                    return allowSubmit;
+                },
+                beforeSubmitScope:theScope
+            });
+            validator.on('formSubmit',function(){formSubmitted = true;});
+            validator.submit();
+            Assert.isFalse(formSubmitted);
+            Assert.isFalse(theScope.beforeSubmitCalled);
+            formValid = true;
+            validator.submit();
+            Assert.isFalse(formSubmitted);
+            Assert.isTrue(theScope.beforeSubmitCalled);
+            allowSubmit = true;
+            validator.submit();
+            Assert.isTrue(formSubmitted);
         }
     })
 });
