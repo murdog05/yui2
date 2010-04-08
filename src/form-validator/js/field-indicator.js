@@ -1,8 +1,11 @@
-(function(){
+/*jslint white: true, browser: true, forin: true, onevar: true, undef: true, eqeqeq: true, bitwise: true, regexp: true, strict: true, newcap: true, immed: true */
+"use strict";
+var YAHOO = YAHOO || {};
+
+(function () {
     var Y = YAHOO,
     YL = Y.lang,
     YU = Y.util,
-    YE = YU.Event,
     YW = Y.widget,
     YD = YU.Dom;
 
@@ -18,45 +21,45 @@
      * @param {Object} config Configuration for the indicator
      * @param {HTMLElement|String} neighbor Html Element used to dynamically create the indicator dom if an el is not already created.
      */
-    function FieldIndicator(config,neighbor){
+    function FieldIndicator(config, neighbor) {
         // I have to setup the dom element BEFORE i call the super class' constructor or else and error occurs.
         // I could pass document.body, then change it after, if need be, but I don't think this would be good practice
-        var args = this._init(config,neighbor);
-        FieldIndicator.superclass.constructor.apply(this,args);
+        var args = this._init(config, neighbor);
+        FieldIndicator.superclass.constructor.apply(this, args);
     }
 
     /**
      * Augment form with standard indicator definitions.
      */
-    YL.augmentObject(FieldIndicator,{
+    YL.augmentObject(FieldIndicator, {
         /**
          * This is a collection of default events for registering indicators with event sources.
          * @property FormEvents
          * @static
          * @type Object
          */
-        FormEvents:{
-            notInRange:function(){
+        FormEvents: {
+            notInRange: function () {
                 return {
-                    show:['numberOutOfRange'],
-                    hide:['inputEmpty','numberInRange','incorrectFormat']
+                    show: ['numberOutOfRange'],
+                    hide: ['inputEmpty', 'numberInRange', 'incorrectFormat']
                 };
             },
-            valid:function(){
+            valid: function () {
                 return {
-                    hide:['inputInvalid'],
-                    show:['inputValid']
+                    hide: ['inputInvalid'],
+                    show: ['inputValid']
                 };
             },
-            invalid:function(){
+            invalid: function () {
                 return {
-                    show:['inputInvalid'],
-                    hide:['inputValid']
+                    show: ['inputInvalid'],
+                    hide: ['inputValid']
                 };
             },
-            all:function(){
+            all: function () {
                 return {
-                    show:['inputValueChange']
+                    show: ['inputValueChange']
                 };
             }
         },
@@ -66,21 +69,21 @@
          * @static
          * @type Object
          */
-        DefaultStyle:{
-            correct:{
-                tagType:'DIV',
-                className:'indicator',
-                html:'&nbsp;'
+        DefaultStyle: {
+            correct: {
+                tagType: 'DIV',
+                className: 'indicator',
+                html: '&nbsp;'
             },
-            incorrect:{
-                tagType:'DIV',
-                className:'validator',
-                html:'&nbsp;'
+            incorrect: {
+                tagType: 'DIV',
+                className: 'validator',
+                html: '&nbsp;'
             },
-            emptystyle:{
-                tagType:'DIV',
-                className:'',
-                html:''
+            emptystyle: {
+                tagType: 'DIV',
+                className: '',
+                html: ''
             }
         },
         /**
@@ -89,20 +92,20 @@
          * @static
          * @type Object
          */
-        Indicators:{
-            correct:function(){
+        Indicators: {
+            correct: function () {
                 return {
-                    style:'correct'
+                    style: 'correct'
                 };
             },
-            incorrect:function(){
+            incorrect: function () {
                 return {
-                    style:'incorrect'
+                    style: 'incorrect'
                 };
             }
         }
     });
-    Y.extend(FieldIndicator,YU.Element,{
+    Y.extend(FieldIndicator, YU.Element, {
         /**
          * Implementation of Element's abstract method. Sets up config values.
          *
@@ -110,7 +113,7 @@
          * @param config {Object} (Optional) Object literal definition of configuration values.
          * @private
          */
-        initAttributes:function(config){
+        initAttributes: function (config) {
             var oConfigs = config || {};
             FieldIndicator.superclass.initAttributes.call(this, oConfigs);
             /**
@@ -118,14 +121,14 @@
              * @attribute formatter
              * @type function
              */
-            this.setAttributeConfig("formatter",{
-                value:function(fieldValidator,fieldIndicator,meta) {
+            this.setAttributeConfig("formatter", {
+                value: function (fieldValidator, fieldIndicator, meta) {
                     fieldIndicator.get('element').style.display = '';
                 },
-                validator:YL.isFunction,
-                setter:function(val){
-                    if (!val){
-                        return function(fieldValidator,fieldIndicator,meta) {
+                validator: YL.isFunction,
+                setter: function (val) {
+                    if (!val) {
+                        return function (fieldValidator, fieldIndicator, meta) {
                             fieldIndicator.get('element').style.display = '';
                         };
                     }
@@ -135,8 +138,8 @@
                 }
             });
 
-            this.setAttributeConfig('style',{
-                value:null
+            this.setAttributeConfig('style', {
+                value: null
             });
         },
         /**
@@ -150,23 +153,22 @@
          * @return {Object[]} returns an array of 2 elements, the first being the indidcator el, and the second being the configuration.
          * @private
          */
-        _init:function(config,theNeighbor){
-            var el = config.el,theConfig = config,neighbor = theNeighbor;//,validator = null;
-            if (YL.isString(neighbor)){
+        _init: function (config, theNeighbor) {
+            var el = config.el, theConfig = config, neighbor = theNeighbor;
+            if (YL.isString(neighbor)) {
                 neighbor = YD.get(neighbor);
             }
-            if (YL.isString(theConfig)){
-                //console.debug(theConfig);
+            if (YL.isString(theConfig)) {
                 theConfig = FieldIndicator.Indicators[theConfig].call();
             }
-            if (!neighbor && !el){
-                YAHOO.log('No dom element given to field indicator, nor is there any way to create the dom element','warn','FieldIndicator');
+            if (!neighbor && !el) {
+                YAHOO.log('No dom element given to field indicator, nor is there any way to create the dom element', 'warn', 'FieldIndicator');
                 return [theConfig];
             }
             // initialize the dom
-            el = this._initializeDom(theConfig.el,theConfig.style,neighbor);
+            el = this._initializeDom(theConfig.el, theConfig.style, neighbor);
             theConfig.style = null; // clear the style, it is not needed anymore.
-            return [el,theConfig];
+            return [el, theConfig];
         },
         /**
          * This function will create an Html element for the indicator after the given neighbor
@@ -176,18 +178,20 @@
          * @param {HTMLElement} neighbor Html Element that the new Html Element will be placed beside.
          * @return {HTMLElement} new html element that will represent the indicator.
          */
-        _initializeDom:function(el,style,neighbor){
-            var theEl = el,doInsert = true,theStyle = style;
+        _initializeDom: function (el, style, neighbor) {
+            var theEl = el, doInsert = true, theStyle = style;
             // if the el is a string
-            if (YL.isString(theEl)){
+            if (YL.isString(theEl)) {
                 theEl = YD.get(theEl);
             }
-            if (theEl) doInsert = false;
-            theEl = this._setupEl(theEl,theStyle);
+            if (theEl) {
+                doInsert = false;
+            }
+            theEl = this._setupEl(theEl, theStyle);
 
             // if the el was created, then it will need to be inserted.
-            if (doInsert){
-                YD.insertAfter(theEl,neighbor);
+            if (doInsert) {
+                YD.insertAfter(theEl, neighbor);
             }
 
             return theEl;
@@ -199,8 +203,8 @@
          * @param {Object} eventSource Any object that has a subscribe method
          * @param {String|Object} eventKey This can be a key for a predefined default event configuration, or it could be an event configuration object itself.
          */
-        registerEvents:function(eventSource,eventKey){
-            this._initializeEvents(eventSource,eventKey);
+        registerEvents: function (eventSource, eventKey) {
+            this._initializeEvents(eventSource, eventKey);
         },
         /**
          * This is the same as registerEvents, except its in the protected scope.
@@ -209,25 +213,25 @@
          * @param {String|Object} eventKey This can be a key for a predefined default event configuration, or it could be an event configuration object itself.
          * @protected
          */
-        _initializeEvents:function(eventSource,eventKey){
-            var i,methodName,method,events,eventCfg;
-            if (YL.isString(eventKey)){
+        _initializeEvents: function (eventSource, eventKey) {
+            var i, methodName, method, events, eventCfg;
+            if (YL.isString(eventKey)) {
                 eventCfg = FieldIndicator.FormEvents[eventKey].call();
             }
-            else{
+            else {
                 eventCfg = eventKey;
             }
-            if (!eventCfg){
+            if (!eventCfg) {
                 return;
             }
-            for (methodName in eventCfg){
+            for (methodName in eventCfg) {
                 method = this[methodName];
-                if (!YL.isFunction(method)){
-                    YAHOO.log('You can only use functions to subscribe to validator events','warn','FieldIndicator');
+                if (!YL.isFunction(method)) {
+                    YAHOO.log('You can only use functions to subscribe to validator events', 'warn', 'FieldIndicator');
                 }
                 events = eventCfg[methodName];
-                for (i = 0 ; i < events.length; ++i){
-                    eventSource.subscribe(events[i],method,this,this);
+                for (i = 0 ; i < events.length; ++i) {
+                    eventSource.subscribe(events[i], method, this, this);
                 }
             }
         },
@@ -240,26 +244,26 @@
          * @param {Object|String} style Configuration or key for default style used to create the element.  Information such as tag type, class name and inner html would be defined here
          * @return {HTMLElement} html element styled using the given configuration.
          */
-        _setupEl:function(el,style){
-            var rtVl = el,theStyle = style;
-            if (!style){
+        _setupEl: function (el, style) {
+            var rtVl = el, theStyle = style;
+            if (!style) {
                 theStyle = FieldIndicator.DefaultStyle.emptystyle;
             }
-            else if (YL.isString(theStyle)){
+            else if (YL.isString(theStyle)) {
                 theStyle = FieldIndicator.DefaultStyle[theStyle.toLowerCase()];
             }
             // if we still don't have a value for rtVl, then a dom object must be created
-            if (!rtVl){
+            if (!rtVl) {
                 rtVl = document.createElement(theStyle.tagType);
-                if (theStyle.html){
+                if (theStyle.html) {
                     rtVl.innerHTML = theStyle.html;
                 }
-                if (theStyle.className){
+                if (theStyle.className) {
                     rtVl.className = theStyle.className;
                 }
             }
-            else{
-                if (rtVl.className == '' && theStyle.className){
+            else {
+                if ((rtVl.className === '') && theStyle.className) {
                     rtVl.className = theStyle.className;
                 }
             }
@@ -272,33 +276,33 @@
          * function provided to the indicator.
          * @method show
          */
-        show:function(args,formValidator){
-            var formatter = this.get('formatter'), errorMeta,validator;
-            if (args){
+        show: function (args, formValidator) {
+            var formatter = this.get('formatter'), errorMeta, validator;
+            if (args) {
                 errorMeta = args[0];
                 validator = args[1];
             }
             // indicators will never show if the field is optional and empty
-            if (validator.get('optional') && validator.isEmpty()){
+            if (validator.get('optional') && validator.isEmpty()) {
                 this.hide();
             }
-            else{
-                formatter.call(formValidator,validator,this,errorMeta);
+            else {
+                formatter.call(formValidator, validator, this, errorMeta);
             }
         },
         /**
          * This will hide the indicator.
          * @method hide
          */
-        hide:function(args,formValidator){
-            this.setStyle('display','none');
+        hide: function (args, formValidator) {
+            this.setStyle('display', 'none');
         }
     });
     YW.FieldIndicator = FieldIndicator;
-    if (YW.FormValidator){
+    if (YW.FormValidator) {
         YW.FormValidator.FieldIndicator = FieldIndicator;
     }
     if (YW.FormGroup) {
         YW.FormGroup.FieldIndicator = FieldIndicator;
     }
-})();
+}());

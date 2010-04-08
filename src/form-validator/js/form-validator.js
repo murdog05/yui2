@@ -1,4 +1,8 @@
-(function(){
+/*jslint white: true, forin: true, onevar: true, undef: true, eqeqeq: true, bitwise: true, regexp: true, strict: true, newcap: true, immed: true */
+"use strict";
+var YAHOO = YAHOO || {};
+
+(function () {
     var Y = YAHOO,
     YL = Y.lang,
     YU = Y.util,
@@ -14,12 +18,12 @@
      * @param {HTMLElement} el The form dom object
      * @param {Object} config Form validation configuration
      */
-    function FormValidator(el,config){
-        FormValidator.superclass.constructor.apply(this,arguments);
-        this._init()
+    function FormValidator(el, config) {
+        FormValidator.superclass.constructor.apply(this, arguments);
+        this._init();
     }
     
-    Y.extend(FormValidator,YU.Element,{
+    Y.extend(FormValidator, YU.Element, {
         /**
          * Implementation of Element's abstract method. Sets up config values.
          *
@@ -27,7 +31,7 @@
          * @param config {Object} (Optional) Object literal definition of configuration values.
          * @private
          */
-        initAttributes:function(config){
+        initAttributes: function (config) {
             var oConfigs = config || {};
             FormValidator.superclass.initAttributes.call(this, oConfigs);
             /**
@@ -35,9 +39,9 @@
              * @attribute fields
              * @type object
              */
-            this.setAttributeConfig("fields",{
-                value:null,
-                validator:YL.isObject
+            this.setAttributeConfig("fields", {
+                value: null,
+                validator: YL.isObject
             });
             /**
              * This will allow any button to be treated as as submit button on
@@ -45,9 +49,9 @@
              * @attribute buttons
              * @type String[]
              */
-            this.setAttributeConfig("buttons",{
-                value:null,
-                validator:function(val){
+            this.setAttributeConfig("buttons", {
+                value: null,
+                validator: function (val) {
                     return YL.isArray(val) || YL.isString(val) || YL.isObject(val);
                 }
             });
@@ -57,9 +61,9 @@
              * @attribute findButtons
              * @type boolean
              */
-            this.setAttributeConfig('findButtons',{
-                value:true,
-                validator:YL.isBoolean
+            this.setAttributeConfig('findButtons', {
+                value: true,
+                validator: YL.isBoolean
             });
             /**
              * If this is set to true, the form will not submit natively, but
@@ -68,9 +72,9 @@
              * @attribute asyncSubmit
              * @type boolean
              */
-            this.setAttributeConfig('asyncSubmit',{
-                value:false,
-                validator:YL.isBoolean
+            this.setAttributeConfig('asyncSubmit', {
+                value: false,
+                validator: YL.isBoolean
             });
             /**
              * This is the function that will get executed before the form
@@ -79,18 +83,20 @@
              * @attribute beforeSubmit
              * @type function
              */
-            this.setAttributeConfig('beforeSubmit',{
-                value:function() {return true},
-                validator:YL.isFunction
+            this.setAttributeConfig('beforeSubmit', {
+                value: function () {
+                    return true;
+                },
+                validator: YL.isFunction
             });
             /**
              * Scope in which the before submit is called.
              * @attribute beforeSubmitScope
              * @type Object
              */
-            this.setAttributeConfig('beforeSubmitScope',{
-                value:{},
-                validator:YL.isObject
+            this.setAttributeConfig('beforeSubmitScope', {
+                value: {},
+                validator: YL.isObject
             });
 
         },
@@ -99,7 +105,7 @@
          * @method _init
          * @param {Object} config Called by the constructor to initialize the inputs, buttons and events.
          */
-        _init:function(){
+        _init: function () {
             this._initializeSubmitButtons();
             this._initializeFields();
             this._initializeEvents();
@@ -112,7 +118,7 @@
          * @type YAHOO.widget.FieldValidator[]
          * @protected
          */
-        _validation:null,
+        _validation: null,
         /**
          * This will hold all the indicators that are used with the fields in the
          * form
@@ -128,56 +134,56 @@
          *
          * @method _initializeFields
          */
-        _initializeFields: function(){
-            var fields = this.get('fields'),curInput,j,curIndsJson,inds,key,indicatorKey,el,inputCfg,ind;
+        _initializeFields: function () {
+            var fields = this.get('fields'), curInput, j, curIndsJson, inds, key, indicatorKey, el, inputCfg, ind;
             this._validation = [];
             this._indicators = [];
-            for (key in fields){
+            for (key in fields) {
                 inputCfg = fields[key];
                 // if its a group, we instantiate a form group
                 if (inputCfg.validation && inputCfg.validation.fields) {
-                    curInput = new FormValidator.FormGroup(key,inputCfg.validation);
+                    curInput = new FormValidator.FormGroup(key, inputCfg.validation);
                 }
                 else {
                     el = YD.get(key);
-                    curInput = new FormValidator.FieldValidator(el,inputCfg.validation);
+                    curInput = new FormValidator.FieldValidator(el, inputCfg.validation);
                 }
                 // due to the fact that select element's change events do not bubble, we
                 // need to subscribe directly to their change events.
                 this._checkSelect(curInput);
                 inds = inputCfg.indicators;
                 // singular, will subscribe to just the input change event
-                if (inds instanceof FormValidator.FieldIndicator){
+                if (inds instanceof FormValidator.FieldIndicator) {
                     // if just an indicator is given, it is automatically subscribed to all
-                    this._initializeIndicator('all',curInput,inds);
+                    this._initializeIndicator('all', curInput, inds);
                 }
-                else{
-                    for (indicatorKey in inds){
+                else {
+                    for (indicatorKey in inds) {
                         curIndsJson = inds[indicatorKey];
-                        if (YL.isArray(curIndsJson)){
-                            for (j = 0 ; j < curIndsJson.length; ++j){
-                                this._initializeIndicator(indicatorKey,curInput,curIndsJson[j]);
+                        if (YL.isArray(curIndsJson)) {
+                            for (j = 0 ; j < curIndsJson.length; ++j) {
+                                this._initializeIndicator(indicatorKey, curInput, curIndsJson[j]);
                             }
                         }
-                        else{
-                            this._initializeIndicator(indicatorKey,curInput,curIndsJson);
+                        else {
+                            this._initializeIndicator(indicatorKey, curInput, curIndsJson);
                         }
                     }
                 }
                 ind = inputCfg.indicator;
-                if (ind){
-                    if (ind instanceof FormValidator.FieldIndicator){
+                if (ind) {
+                    if (ind instanceof FormValidator.FieldIndicator) {
                         // if just an indicator is given, it is automatically subscribed to all
-                        this._initializeIndicator('all',curInput,ind);
+                        this._initializeIndicator('all', curInput, ind);
                     }
-                    else{
-                        if (YL.isArray(ind)){
-                            for (j = 0 ; j < ind.length; ++j){
-                                this._initializeIndicator('invalid',curInput,ind[j]);
+                    else {
+                        if (YL.isArray(ind)) {
+                            for (j = 0 ; j < ind.length; ++j) {
+                                this._initializeIndicator('invalid', curInput, ind[j]);
                             }
                         }
-                        else{
-                            this._initializeIndicator('invalid',curInput,ind);
+                        else {
+                            this._initializeIndicator('invalid', curInput, ind);
                         }
                     }
                 }
@@ -189,16 +195,18 @@
          * register the on change event with the delegate function
          * @method _checkSelect
          */
-        _checkSelect:function(input){
+        _checkSelect: function (input) {
             if (FormValidator.FormGroup && (input instanceof FormValidator.FormGroup)) {
-                input.subscribe('selectChange',function(eventName,args) {
-                    this._onFormInteraction(null,args[0],null);
+                input.subscribe('selectChange', function (eventName, args) {
+                    this._onFormInteraction(null, args[0], null);
                 }, this, true);
             }
             else {
                 var element = input.get('element');
-                if (element.tagName.toLowerCase() === 'select'){
-                    YE.on(element,'change',function(){this._onFormInteraction(null,element,null);},this,true);
+                if (element.tagName.toLowerCase() === 'select') {
+                    YE.on(element, 'change', function () {
+                        this._onFormInteraction(null, element, null);
+                    }, this, true);
                 }
             }
         },
@@ -210,15 +218,15 @@
          * @param {YAHOO.widget.FieldValidator} fieldValidator validation input the field indicator will be associated with.
          * @param {Object|YAHOO.widget.FieldIndicator} indicatorConfig The configuration for the indicator, or the indicator object itself.
          */
-        _initializeIndicator:function(eventKey,fieldValidator,indicatorConfig){
+        _initializeIndicator: function (eventKey, fieldValidator, indicatorConfig) {
             var indicator;
-            if (indicatorConfig instanceof FormValidator.FieldIndicator){
+            if (indicatorConfig instanceof FormValidator.FieldIndicator) {
                 indicator = indicatorConfig;
             }
-            else{
-                indicator = new FormValidator.FieldIndicator(indicatorConfig,fieldValidator.get('element'));
+            else {
+                indicator = new FormValidator.FieldIndicator(indicatorConfig, fieldValidator.get('element'));
             }
-            indicator.registerEvents(fieldValidator,eventKey);
+            indicator.registerEvents(fieldValidator, eventKey);
             this._indicators.push(indicator);
         },
         /**
@@ -228,16 +236,24 @@
          * registers a keyup, blur, click or change listener on the form for event delegation.
          * @method _initializeEvents
          */
-        _initializeEvents:function(){
+        _initializeEvents: function () {
             var el = this.get('element');
-            YU.Event.on(el,'submit',this._onFormSubmit,this,true);
-            YU.Event.on(el,'reset',this._onFormReset,this,true);
+            YU.Event.on(el, 'submit', this._onFormSubmit, this, true);
+            YU.Event.on(el, 'reset', this._onFormReset, this, true);
             
             // When input values are changed
-            YU.Event.delegate(el,'keyup',this._onFormInteraction,function(element){return element;},this,true);
-            YU.Event.delegate(el,'blur',this._onFormInteraction,function(element){return element;},this,true);
-            YU.Event.delegate(el,'click',this._onFormInteraction,function(element){return element;},this,true);
-            YU.Event.delegate(el,'change',this._onFormInteraction,function(element){return element;},this,true);
+            YU.Event.delegate(el, 'keyup', this._onFormInteraction, function (element) {
+                return element;
+            }, this, true);
+            YU.Event.delegate(el, 'blur', this._onFormInteraction, function (element) {
+                return element;
+            }, this, true);
+            YU.Event.delegate(el, 'click', this._onFormInteraction, function (element) {
+                return element;
+            }, this, true);
+            YU.Event.delegate(el, 'change', this._onFormInteraction, function (element) {
+                return element;
+            }, this, true);
         },
         /**
          * This will take all submit buttons, wrap them in a button object
@@ -245,29 +261,29 @@
          * events respectively.
          * @method _initializeSubmitButtons
          */
-        _initializeSubmitButtons:function(){
-            var submitButtons,i,button,configButtons = this.get('buttons'),tempHash = {};
+        _initializeSubmitButtons: function () {
+            var submitButtons, i, button, configButtons = this.get('buttons'), tempHash = {};
             this.buttons = [];
-            if (YL.isArray(configButtons)){
-                for (i = 0 ; i < configButtons.length; ++i){
+            if (YL.isArray(configButtons)) {
+                for (i = 0 ; i < configButtons.length; ++i) {
                     button = this._addButton(configButtons[i]);
-                    if (button.get('element').id != null){
+                    if (button.get('element').id) {
                         tempHash[button.get('element').id] = true;
                     }
                 }
             }
-            else if (configButtons){
+            else if (configButtons) {
                 button = this._addButton(configButtons);
-                if (button.get('element').id != null){
+                if (button.get('element').id) {
                     tempHash[button.get('element').id] = true;
                 }
             }
 
-            if (this.get('findButtons')){
-                submitButtons = this._getSubmitButtons(this.get('element'))
-                for (i = 0 ; i < submitButtons.length; ++i){
+            if (this.get('findButtons')) {
+                submitButtons = this._getSubmitButtons(this.get('element'));
+                for (i = 0 ; i < submitButtons.length; ++i) {
                     // prevent duplicates
-                    if (!tempHash[submitButtons[i].id]){
+                    if (!tempHash[submitButtons[i].id]) {
                         this._addButton(submitButtons[i]);
                     }
                 }
@@ -280,11 +296,11 @@
          * @param {HTMLElement|String} el
          * @return {YAHOO.widget.FormButton newly created button
          */
-        _addButton:function(el){
+        _addButton: function (el) {
             var button = new FormValidator.FormButton(el);
             this.buttons.push(button);
-            this.subscribe('formValid',button.enable,button,true);
-            this.subscribe('formInvalid',button.disable,button,true);
+            this.subscribe('formValid', button.enable, button, true);
+            this.subscribe('formInvalid', button.disable, button, true);
             return button;
         },
         /**
@@ -293,22 +309,22 @@
          * @param {HTMLElement} parent The node who's children will be checked for submit buttons.
          * @return {HTMLElement[]} list of submit buttons.
          */
-        _getSubmitButtons:function(parent){
-            var rtVl = [],children,i;
-            if (parent.tagName){
-                if ((parent.tagName.toLowerCase() == 'input') && (parent.type == 'submit')){
+        _getSubmitButtons: function (parent) {
+            var rtVl = [], children, i;
+            if (parent.tagName) {
+                if ((parent.tagName.toLowerCase() === 'input') && (parent.type === 'submit')) {
                     return [parent];
                 }
-                else if ((parent.tagName.toLowerCase() == 'input') && (parent.type == 'image')){
+                else if ((parent.tagName.toLowerCase() === 'input') && (parent.type === 'image')) {
                     return [parent];
                 }
-                else if ((parent.tagName.toLowerCase() == 'button')){
+                else if ((parent.tagName.toLowerCase() === 'button')) {
                     return [parent];
                 }
             }
 
-            children = YD.getChildren(parent)
-            for (i = 0 ; i < children.length; ++i){
+            children = YD.getChildren(parent);
+            for (i = 0 ; i < children.length; ++i) {
                 rtVl = rtVl.concat(this._getSubmitButtons(children[i]));
             }
             return rtVl;
@@ -317,18 +333,18 @@
          * This will cause all the indicators and validators to update to the proper display value
          * @method validate
          */
-        validate:function(){
-            var vals = this._validation,i,isValid = true;
-            for (i = 0 ; i < vals.length; ++i){
-                if (!vals[i].validate()){
+        validate: function () {
+            var vals = this._validation, i, isValid = true;
+            for (i = 0 ; i < vals.length; ++i) {
+                if (!vals[i].validate()) {
                     isValid = false;
                 }
             }
             if (isValid) {
-                this.fireEvent('formValid',this);
+                this.fireEvent('formValid', this);
             }
             else {
-                this.fireEvent('formInvalid',this);
+                this.fireEvent('formInvalid', this);
             }
         },
         /**
@@ -336,8 +352,8 @@
          * @method getInvalidFields
          * @return FieldValidator[]
          */
-        getInvalidFields:function(){
-            var rtVl = [],i=0;
+        getInvalidFields: function () {
+            var rtVl = [], i = 0;
             for (;i < this._validation.length; ++i) {
                 if (!this._validation[i].isValid()) {
                     rtVl.push(this._validation[i]);
@@ -350,8 +366,8 @@
          * @method getValidFields
          * @return FieldValidator[]
          */
-        getValidFields:function(){
-            var rtVl = [],i=0;
+        getValidFields: function () {
+            var rtVl = [], i = 0;
             for (;i < this._validation.length; ++i) {
                 if (this._validation[i].isValid()) {
                     rtVl.push(this._validation[i]);
@@ -364,10 +380,12 @@
          * @method isValid
          * @return {boolean} true if every input in the form is valid.
          */
-        isValid:function(){
-            var i,validation = this._validation;
-            for (i = 0 ; i < validation.length; ++i){
-                if (!validation[i].isValid()) return false;
+        isValid: function () {
+            var i, validation = this._validation;
+            for (i = 0 ; i < validation.length; ++i) {
+                if (!validation[i].isValid()) {
+                    return false;
+                }
             }
             return true;
         },
@@ -375,14 +393,14 @@
          * This will be called whenever the form is changed.
          * @method _onFormChange
          */
-        _onFormChange:function(){
-            if (this.isValid()){
+        _onFormChange: function () {
+            if (this.isValid()) {
                 this.fireEvent('formValid', this);
             }
-            else{
-                this.fireEvent('formInvalid',this);
+            else {
+                this.fireEvent('formInvalid', this);
             }
-            this.fireEvent('onFormChange');
+            this.fireEvent('onFormChange', this);
         },
         /**
          * This will invoke the form's submit method.  If there is no submit method
@@ -390,13 +408,13 @@
          * will only be done if the form is valid.
          * @method submit
          */
-        submit:function(){
-            if (!this.isValid()){
+        submit: function () {
+            if (!this.isValid()) {
                 return;
             }
             var form = this.get('element');
             // submit the form.
-            if (form.submit){
+            if (form.submit) {
                 form.submit();
             }
             else {
@@ -410,15 +428,15 @@
          * @method _checkEvents
          * @param {Object} ev Window event that caused the submit.
          */
-        _checkEvents:function(ev){
-            if (!this.isValid()){
+        _checkEvents: function (ev) {
+            if (!this.isValid()) {
                 if (ev) {
                     YE.preventDefault(ev);
                 }
                 return;
             }
             var async = this.get('asyncSubmit');
-            if (async){
+            if (async) {
                 if (ev) {
                     YE.preventDefault(ev);
                 }
@@ -427,19 +445,19 @@
                  * and should not submit natively.
                  * @event asyncSubmit
                  */
-                this.fireEvent('asyncSubmit');
+                this.fireEvent('asyncSubmit', this);
             }
             /**
              * This is fired when the form is submitted.
              * @event formSubmit
              */
-            this.fireEvent('formSubmit');
+            this.fireEvent('formSubmit', this);
         },
         /**
          * This function is called when the form is submitted.  If the form is
          * not valid, the submit event on the form is cancelled.
          */
-        _onFormSubmit:function(ev){
+        _onFormSubmit: function (ev) {
             this._checkEvents(ev);
         },
         /**
@@ -451,9 +469,9 @@
          * @param {HTMLElement} matchedEl Element that was the target of the form interaction
          * @param {HTMLElement} container Element container the delegate is listening on that contains the matched El
          */
-        _onFormInteraction:function(event,matchedEl,container){
+        _onFormInteraction: function (event, matchedEl, container) {
             var validator = this.getValidatorByInput(matchedEl);
-            if (validator){
+            if (validator) {
                 validator.validate();
                 this._onFormChange();
             }
@@ -466,7 +484,7 @@
         getById: function (id) {
             var vs = this._validation, i, temp;
             for (i = 0; i < vs.length; ++i) {
-                if (vs[i] instanceof FormGroup) {
+                if (FormValidator.FormGroup && (vs[i] instanceof FormValidator.FormGroup)) {
                     if (vs[i].id === id) {
                         return vs[i];
                     }
@@ -524,13 +542,13 @@
          * @method _onFormReset
          * @param {Event} ev Event that caused the reset.
          */
-        _onFormReset:function(ev){
+        _onFormReset: function (ev) {
             var that = this;
-            setTimeout(function(){
+            setTimeout(function () {
                 that.validate();
-            },100);
+            }, 100);
             this.validate();
         }
     });
     YW.FormValidator = FormValidator;
-})();
+}());

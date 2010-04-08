@@ -1,77 +1,86 @@
+/*jslint white: true, browser: true, forin: true, onevar: true, undef: true, eqeqeq: true, bitwise: true, regexp: true, strict: true, newcap: true, immed: true */
+"use strict";
+var YAHOO = YAHOO || {};
+
 /**
  * This will house the validation function which
  * will perform the validation on the input field from the form.
  * @namespace YAHOO.widget
  */
-(function()
-{
+(function () {
     var Y = YAHOO,
     YL = Y.lang,
     YU = Y.util,
-    YW = Y.widget,
-    YD = YU.Dom;
+    YW = Y.widget;
     /**
-     * The field validator class is
+     * The field validator class handles validating values entered into fields
+     * in the form.
      * @class FieldValidator
      * @constructor
      * @param {HTMLElement} el The input element the field validator is for.
      * @param {Object|String|Function} config Configuration for the validation
      */
-    function FieldValidator(el,config){
-        FieldValidator.superclass.constructor.apply(this,[el,FieldValidator._initConfig(config)]);
-        this._initializeValidator();
+    function FieldValidator(el, config) {
+        FieldValidator.superclass.constructor.apply(this, [el, FieldValidator._initConfig(config)]);
     }    
 
-    YL.augmentObject(FieldValidator,{
+    YL.augmentObject(FieldValidator, {
         /**
          * The maximum value for an integer.  Used as a default min/max value on number fields
          * @property MAX_INTEGER
          * @type number
          * @static
          */
-        MAX_INTEGER:2147483647,
+        MAX_INTEGER: 2147483647,
         /**
          * Regular expression used by the Integer field for ensuring the input matches the format of an integer
          * @property INTEGERREGEX
          * @type regex
          * @static
          */
-        INTEGERREGEX:/(^-?\d\d*\.\d*$)|(^-?\d\d*$)|(^-?\.\d\d*$)/,
+        INTEGERREGEX: /(^-?\d\d*\.\d*$)|(^-?\d\d*$)|(^-?\.\d\d*$)/,
         /**
          * Regular expression used by the DoubleField for ensuring the input matches the format of an double
          * @property DOUBLEREGEX
          * @type regex
          * @static
          */
-        DOUBLEREGEX:/(^-?\d\d*\.\d+$)|(^-?\d\d*$)|(^-?\.\d\d*$)/,
+        DOUBLEREGEX: /(^-?\d\d*\.\d+$)|(^-?\d\d*$)|(^-?\.\d\d*$)/,
         /**
          * Regular expression for an e-mail.
          * @property EMAILREGEX
          * @type regex
          * @static
          */
-        EMAILREGEX:/^([a-zA-Z0-9_\.\-])+\@(([a-zA-Z0-9\-])+\.)+([a-zA-Z0-9]{2,4})+$/,
+        EMAILREGEX: /^([a-zA-Z0-9_\.\-])+\@(([a-zA-Z0-9\-])+\.)+([a-zA-Z0-9]{2,4})+$/,
+        /**
+         * Regular expression for a phone number.
+         * @property EMAILREGEX
+         * @type regex
+         * @static
+         */
+        PHONEREGEX: /^([(]?[2-9]\d{2}[)]?)[ ]*-?[ ]*(\d{3})[ ]*-?[ ]*(\d{4})$/,
         /**
          * This is the regular expression used to check if the user's password meets the strongest password strength criteria.
          * @property StrongPassword
          * @static
          * @type regex
          */
-        StrongPassword:/^(?=.{8,})(?=.*[A-Z])(?=.*[a-z])(?=.*[0-9])(?=.*\W).*$/,
+        StrongPassword: /^(?=.{8,})(?=.*[A-Z])(?=.*[a-z])(?=.*[0-9])(?=.*\W).*$/,
         /**
          * This is the regular expression used to check if the user's password meets medium password strength criteria.
          * @property MediumPassword
          * @static
          * @type regex
          */
-        MediumPassword:/^(?=.{7,})(((?=.*[A-Z])(?=.*[a-z]))|((?=.*[A-Z])(?=.*[0-9]))|((?=.*[a-z])(?=.*[0-9]))).*$/,
+        MediumPassword: /^(?=.{7,})(((?=.*[A-Z])(?=.*[a-z]))|((?=.*[A-Z])(?=.*[0-9]))|((?=.*[a-z])(?=.*[0-9]))).*$/,
         /**
          * This is the regular expression used to check if the user's password meets the minimum password strength criteria.
          * @property WeakPassword
          * @static
          * @type regex
          */
-        WeakPassword:/(?=.{6,}).*/,
+        WeakPassword: /(?=.{6,}).*/,
         /**
          * Given a configuration that could be a string, function or a configuration object,
          * this will ensure a proper configuration object is returned and passed to the super class.
@@ -79,21 +88,21 @@
          * @param {Object|String|Function} config Configuration for the field validation
          * @return {Object} configuration object for the field validation.
          */
-        _initConfig:function(config){
+        _initConfig: function (config) {
             var oConfig;
             // if all that is given is a function or a string, then we put it as the type in a configuration object
             // and initialize from there.
-            if (YL.isFunction(config) || YL.isString(config)){
+            if (YL.isFunction(config) || YL.isString(config)) {
                 oConfig = {
-                    type:config
+                    type: config
                 };
             }
-            else if (YL.isObject(config)){
+            else if (YL.isObject(config)) {
                 // otherwise, we assume its an object, and
                 oConfig = config;
             }
-            else{
-                YAHOO.log('Invalid configuration provided for form element.  Must provide string, function or configuration object.','warn','FieldValidator');
+            else {
+                YAHOO.log('Invalid configuration provided for form element.  Must provide string, function or configuration object.', 'warn', 'FieldValidator');
                 oConfig = {};
             }
             return oConfig;
@@ -108,28 +117,27 @@
          * @param {String} map Map that contains the checkers the key and value will be used with.
          * @return {function} function that will return a boolean value based on a single input.
          */
-        _initializeChecker:function(key,val,map){
-            var checker = val,temp,regex;
+        _initializeChecker: function (key, val, map) {
+            var checker = val, temp, regex;
             if (!checker) {
                 return null;
             }
-            else if (YL.isString(checker)){
+            else if (YL.isString(checker)) {
                 // check and see if the string is a predefined validator function
                 temp = map[checker.toLowerCase()];
                 // if it isn't, then we will assume its a regular expression
-                if (!temp){
+                if (!temp) {
                     regex = new RegExp(checker);
-                    return function(el){
+                    return function (el) {
                         return regex.test(el.value);
                     };
                 }
-                else{
+                else {
                     return temp;
-                //this.set(key,temp);
                 }
             }
-            else if (!YL.isFunction(checker)){
-                YAHOO.log('Please provide a valid type, function or regular expression for the ' + key + ' attribute','warn','FieldValidator');
+            else if (!YL.isFunction(checker)) {
+                YAHOO.log('Please provide a valid type, function or regular expression for the ' + key + ' attribute', 'warn', 'FieldValidator');
             }
             return checker;
         },
@@ -141,122 +149,122 @@
          * @static
          * @type Object
          */
-        Validators:{
-            integer:function(el){
-                var value = el.value,theVal;
-                if (!FieldValidator.INTEGERREGEX.test(value)){
+        Validators: {
+            integer: function (el) {
+                var value = el.value, theVal;
+                if (!FieldValidator.INTEGERREGEX.test(value)) {
                     //this.fireEvent('incorrectFormat');
-                    this.addMeta('incorrectFormat','Format of number is incorrect')
+                    this.addMeta('incorrectFormat', 'Format of number is incorrect');
                     return false;
                 }
-                if ( value.indexOf( '.' ) != -1 ){
-                    this.addMeta('incorrectFormat','Format of number is incorrect')
+                if (value.indexOf('.') !== -1) {
+                    this.addMeta('incorrectFormat', 'Format of number is incorrect');
                     return false; // don't allow numbers with decimals
                 }
-                try{
-                    theVal = parseInt(value,10);
+                try {
+                    theVal = parseInt(value, 10);
                 }
-                catch(e){
+                catch (e) {
                     return false;
                 }
 
-                if ( theVal.toString().toLowerCase() == 'nan' ){
-                    this.addMeta('incorrectFormat','Format of number is incorrect')
+                if (theVal.toString().toLowerCase() === 'nan') {
+                    this.addMeta('incorrectFormat', 'Format of number is incorrect');
                     return false;
                 }
-                else{
-                    return this._validation._checkRange(theVal,this);
+                else {
+                    return this._validation._checkRange(theVal, this);
                 }
             },
-            'double':function(el){
-                var value = el.value,numVal = 0,maxDecimals = this._validation.get('maxDecimalPlaces'),decimals;
-                if ((maxDecimals != -1) && (value.indexOf('.') != -1)){
-                    this.addMeta('incorrectFormat','Format of double is incorrect')
+            'double': function (el) {
+                var value = el.value, numVal = 0, maxDecimals = this._validation.get('maxDecimalPlaces'), decimals;
+                if ((maxDecimals !== -1) && (value.indexOf('.') !== -1)) {
+                    this.addMeta('incorrectFormat', 'Format of double is incorrect');
                     decimals = value.split('.')[1];
                     if (decimals.length > maxDecimals) {
                         return false;
                     }
                 }
-                if (!YW.FieldValidator.DOUBLEREGEX.test(el.value)){
-                    this.addMeta('incorrectFormat','Format of double is incorrect')
+                if (!YW.FieldValidator.DOUBLEREGEX.test(el.value)) {
+                    this.addMeta('incorrectFormat', 'Format of double is incorrect');
                     return false;
                 }                
-                try{
-                    numVal = parseFloat(value,10);
+                try {
+                    numVal = parseFloat(value, 10);
                 }
-                catch(e){
+                catch (e) {
                     return false;
                 }
 
-                if (!numVal.toString()){
-                    this.addMeta('incorrectFormat','Format of double is incorrect')
+                if (!numVal.toString()) {
+                    this.addMeta('incorrectFormat', 'Format of double is incorrect');
                     return false;
                 }
-                if (numVal.toString().toLowerCase() == 'nan'){
-                    this.addMeta('incorrectFormat','Format of double is incorrect')
+                if (numVal.toString().toLowerCase() === 'nan') {
+                    this.addMeta('incorrectFormat', 'Format of double is incorrect');
                     return false;
                 }
-                return this._validation._checkRange(numVal,this);
+                return this._validation._checkRange(numVal, this);
             },
-            text:function(el){
+            text: function (el) {
                 // TODO: Put in length checking, perhaps use the max property, then the same functionality
                 // from range checking on numbers can be re-used
-                return el.value !== ''
+                return el.value !== '';
             },
-            email:function(el){
+            email: function (el) {
                 // TODO: Put in length checking
                 return YW.FieldValidator.EMAILREGEX.test(el.value);
             },
-            phone:function(el){
-                return /^([(]?[2-9]\d{2}[)]?)[ ]*-?[ ]*(\d{3})[ ]*-?[ ]*(\d{4})$/.test(el.value);
+            phone: function (el) {
+                return YW.FieldValidator.PHONEREGEX.test(el.value);
             },
-            checked:function(el){
+            checked: function (el) {
                 return el.checked;
             },
-            unchecked:function(el){
+            unchecked: function (el) {
                 return !el.checked;
             },
-            'strong-password':function(el) {
+            'strong-password': function (el) {
                 var strong = FieldValidator.StrongPassword,
                 medium = FieldValidator.MediumPassword,
                 weak = FieldValidator.WeakPassword;
 
                 if (strong.test(el.value)) {
-                    this.addMeta('strength','strong');
+                    this.addMeta('strength', 'strong');
                     return true;
                 }
                 else if (medium.test(el.value)) {
-                    this.addMeta('strength','medium');
+                    this.addMeta('strength', 'medium');
                     return false;
                 }
                 else if (weak.test(el.value)) {
-                    this.addMeta('strength','weak');
+                    this.addMeta('strength', 'weak');
                     return false;
                 }
                 else {
-                    this.addMeta('strength','none');
+                    this.addMeta('strength', 'none');
                     return false;
                 }
             },
-            'medium-password':function(el) {
+            'medium-password': function (el) {
                 var strong = FieldValidator.StrongPassword,
                 medium = FieldValidator.MediumPassword,
                 weak = FieldValidator.WeakPassword;
 
                 if (strong.test(el.value)) {
-                    this.addMeta('strength','strong');
+                    this.addMeta('strength', 'strong');
                     return true;
                 }
                 else if (medium.test(el.value)) {
-                    this.addMeta('strength','medium');
+                    this.addMeta('strength', 'medium');
                     return true;
                 }
                 else if (weak.test(el.value)) {
-                    this.addMeta('strength','weak');
+                    this.addMeta('strength', 'weak');
                     return false;
                 }
                 else {
-                    this.addMeta('strength','none');
+                    this.addMeta('strength', 'none');
                     return false;
                 }
             }
@@ -268,14 +276,14 @@
          * @static
          * @type Object
          */
-        EmptyWhen:{
-            notext:function(el){
+        EmptyWhen: {
+            notext: function (el) {
                 return el.value === '';
             }
         }
     });
 
-    YL.extend(FieldValidator,YU.Element,{
+    YL.extend(FieldValidator, YU.Element, {
         /**
          * Validator function to be used to check if the value in the input field
          * is valid.
@@ -283,7 +291,7 @@
          * @type function
          * @private
          */
-        _validator:null,
+        _validator: null,
         /**
          * Implementation of Element's abstract method. Sets up config values.
          *
@@ -291,7 +299,7 @@
          * @param config {Object} (Optional) Object literal definition of configuration values.
          * @private
          */
-        initAttributes:function(config){
+        initAttributes: function (config) {
             var oConfigs = config || {};
             FieldValidator.superclass.initAttributes.call(this, oConfigs);
             
@@ -300,18 +308,18 @@
              * @config minInclusive
              * @type boolean
              */
-            this.setAttributeConfig('minInclusive',{
-                value:true,
-                validator:YL.isBoolean
+            this.setAttributeConfig('minInclusive', {
+                value: true,
+                validator: YL.isBoolean
             });
             /**
              * This is set to true if the maximum allowed values boundary is inclusive
              * @config maxInclusive
              * @type boolean
              */
-            this.setAttributeConfig('maxInclusive',{
-                value:true,
-                validator:YL.isBoolean
+            this.setAttributeConfig('maxInclusive', {
+                value: true,
+                validator: YL.isBoolean
             });
             /**
              * This is the minimum allowed value in the double field.  Default value
@@ -319,12 +327,12 @@
              * @config min
              * @type number
              */
-            this.setAttributeConfig('min',{
-                value:(-1)*YW.FieldValidator.MAX_INTEGER,
-                validator:YL.isNumber,
-                setter:function(val){
-                    if (val < (-1)*YW.FieldValidator.MAX_INTEGER){
-                        return (-1)*YW.FieldValidator.MAX_INTEGER;
+            this.setAttributeConfig('min', {
+                value: (-1) * YW.FieldValidator.MAX_INTEGER,
+                validator: YL.isNumber,
+                setter: function (val) {
+                    if (val < (-1) * YW.FieldValidator.MAX_INTEGER) {
+                        return (-1) * YW.FieldValidator.MAX_INTEGER;
                     }
                     return val;
                 }
@@ -335,12 +343,12 @@
              * @config max
              * @type number
              */
-            this.setAttributeConfig('max',{
-                value:YW.FieldValidator.MAX_INTEGER,
-                validator:YL.isNumber,
-                setter:function(val){
-                    if (val < (-1)*YW.FieldValidator.MAX_INTEGER){
-                        return (-1)*YW.FieldValidator.MAX_INTEGER;
+            this.setAttributeConfig('max', {
+                value: YW.FieldValidator.MAX_INTEGER,
+                validator: YL.isNumber,
+                setter: function (val) {
+                    if (val < (-1) * YW.FieldValidator.MAX_INTEGER) {
+                        return (-1) * YW.FieldValidator.MAX_INTEGER;
                     }
                     return val;
                 }
@@ -351,58 +359,48 @@
              * @config maxDecimalPlaces
              * @type number
              */
-            this.setAttributeConfig('maxDecimalPlaces',{
-                value:-1,
-                validator:YL.isNumber
+            this.setAttributeConfig('maxDecimalPlaces', {
+                value: -1,
+                validator: YL.isNumber
             });
             /**
              * This is the type of validation, text is set by default
              * @config type
              * @type function
              */
-            this.setAttributeConfig('type',{
-                value:'text',
-                setter:function(val){
-                    return FieldValidator._initializeChecker('type',val,FieldValidator.Validators);
+            this.setAttributeConfig('type', {
+                value: 'text',
+                setter: function (val) {
+                    return FieldValidator._initializeChecker('type', val, FieldValidator.Validators);
                 }
             });
-            this.set('type','text');
+            this.set('type', 'text');
             /**
              * This is the type of validation, text is set by default
              * @config empty
              * @type empty
              */
-            this.setAttributeConfig('empty',{
-                value:'notext',
-                setter:function(val){
-                    return FieldValidator._initializeChecker('empty',val,FieldValidator.EmptyWhen);
+            this.setAttributeConfig('empty', {
+                value: 'notext',
+                setter: function (val) {
+                    return FieldValidator._initializeChecker('empty', val, FieldValidator.EmptyWhen);
                 }
             });
-            this.set('empty','notext');
+            this.set('empty', 'notext');
             /**
              * If set, this will show that the input is considered optional, and if not filled
              * in, won't cause the form to be invalid.
              * @config optional
              * @type boolean
              */
-            this.setAttributeConfig('optional',{
-                value:false,
-                validator:YL.isBoolean
+            this.setAttributeConfig('optional', {
+                value: false,
+                validator: YL.isBoolean
             });
             this.setAttributeConfig('formatter', {
-                value: function(el) {},
-                validator:YL.isFunction
+                value: function (el) {},
+                validator: YL.isFunction
             });
-        },
-        /**
-         * This function will initialize the configuration attributes of the validator for validation
-         * @method _initializeValidator
-         * @private
-         */
-        _initializeValidator:function(){
-//            this._validator = this.get('type');
-//            this._empty = this.get('empty');
-            //alert(this._m)
         },
         /**
          * This will return an object that will operate as the scope for the
@@ -412,15 +410,15 @@
          * @method _getMetaWrapper
          * @return {Object} meta object the validation and empty functions operate in.
          */
-        _getMetaWrapper:function(){
+        _getMetaWrapper: function () {
             var meta = {
-                metaData:{},
-                _validation:this,
-                addMeta:function(key,msg){
+                metaData: {},
+                _validation: this,
+                addMeta: function (key, msg) {
                     this.metaData[key] = msg;
                 },
-                _validator:this.get('type'),
-                _empty:this.get('empty')
+                _validator: this.get('type'),
+                _empty: this.get('empty')
             };
             return meta;
         },
@@ -430,7 +428,7 @@
          * @method isEmpty
          * @return {boolean} true if the value is considered empty by the empty function used.
          */
-        isEmpty:function(){
+        isEmpty: function () {
             return this._getMetaWrapper()._empty(this.get('element'));
         },
         /**
@@ -440,34 +438,31 @@
          * @param {boolean} silent If true, the validator will not fire any events.
          * @return {boolean} true if the input is considered valid.
          */
-        validate:function(silent){
-            var isEmpty, isValid, el, optional = this.get('optional'), formatter = this.get('formatter');
-            el = this.get('element');
-            var meta = this._getMetaWrapper();
-            isEmpty = meta._empty(el,meta);
-            isValid = meta._validator(el,meta) || (isEmpty && optional);
+        validate: function (silent) {
+            var el = this.get('element'), optional = this.get('optional'), formatter = this.get('formatter'), meta = this._getMetaWrapper(),
+            isEmpty = meta._empty(el, meta), isValid = meta._validator(el, meta) || (isEmpty && optional);
             
             // if silent, don't invoke any events
-            if (silent === true){
+            if (silent === true) {
                 return isValid;
             }
-            if (isEmpty){
-                this.fireEvent('inputEmpty',[meta.metaData,this]);
+            if (isEmpty) {
+                this.fireEvent('inputEmpty', [meta.metaData, this]);
             }
-            else{
-                this.fireEvent('inputNotEmpty',[meta.metaData,this]);
+            else {
+                this.fireEvent('inputNotEmpty', [meta.metaData, this]);
             }
 
-            if (isValid){
-                this.fireEvent('inputValid',[meta.metaData,this]);
+            if (isValid) {
+                this.fireEvent('inputValid', [meta.metaData, this]);
             }
-            else{
-                this.fireEvent('inputInvalid',[meta.metaData,this]);
+            else {
+                this.fireEvent('inputInvalid', [meta.metaData, this]);
             }
-            this.fireEvent('inputValueChange',[meta.metaData,this]);
+            this.fireEvent('inputValueChange', [meta.metaData, this]);
             // call the formatter if the input is valid and non empty
             if (isValid && !isEmpty) {
-                formatter.call({},el);
+                formatter.call({}, el);
             }
             return isValid;
         },
@@ -479,37 +474,37 @@
          * @param {Object} errorMeta Meta object that is used to store errors.
          * @return {boolean} true if the number is in the range specified on the validator.
          */
-        _checkRange:function(numVal,errorMeta){
-            var minInclusive,maxInclusive,min,max;
+        _checkRange: function (numVal, errorMeta) {
+            var minInclusive, maxInclusive, min, max;
             minInclusive = this.get('minInclusive');
             maxInclusive = this.get('maxInclusive');
             min = this.get('min');
             max = this.get('max');
-            if (minInclusive && (min > numVal)){
-                errorMeta.addMeta('numberBelowMin',{
-                    min:min
+            if (minInclusive && (min > numVal)) {
+                errorMeta.addMeta('numberBelowMin', {
+                    min: min
                 });
                 return false;
             }
-            else if (!minInclusive && (min >= numVal)){
-                errorMeta.addMeta('numberBelowMin',{
-                    min:min
+            else if (!minInclusive && (min >= numVal)) {
+                errorMeta.addMeta('numberBelowMin', {
+                    min: min
                 });
                 return false;
             }
-            else if (maxInclusive && (max < numVal)){
-                errorMeta.addMeta('numberAboveMax',{
-                    max:max
+            else if (maxInclusive && (max < numVal)) {
+                errorMeta.addMeta('numberAboveMax', {
+                    max: max
                 });
                 return false;
             }
-            else if (!maxInclusive && (max <= numVal)){
-                errorMeta.addMeta('numberAboveMax',{
-                    max:max
+            else if (!maxInclusive && (max <= numVal)) {
+                errorMeta.addMeta('numberAboveMax', {
+                    max: max
                 });
                 return false;
             }
-            else{
+            else {
                 return true;
             }
         },
@@ -519,8 +514,7 @@
          * @method isValid
          * @return {boolean} true if the input is valid based on the configuration.
          */
-        isValid:function(){
-            var el = this.get('element');
+        isValid: function () {
             return this.validate(true);
         }
         /**
@@ -541,10 +535,10 @@
          */
     });
     YAHOO.widget.FieldValidator = FieldValidator;
-    if (YW.FormValidator){
+    if (YW.FormValidator) {
         YW.FormValidator.FieldValidator = FieldValidator;
     }
     if (YW.FormGroup) {
         YW.FormGroup.FieldValidator = FieldValidator;
     }
-})();
+}());
