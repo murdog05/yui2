@@ -31,11 +31,11 @@
             var oConfigs = config || {};
             FormValidator.superclass.initAttributes.call(this, oConfigs);
             /**
-             * This will hold the configuration for the inputs of the form
-             * @attribute inputs
+             * This will hold the configuration for the fields of the form
+             * @attribute fields
              * @type object
              */
-            this.setAttributeConfig("inputs",{
+            this.setAttributeConfig("fields",{
                 value:null,
                 validator:YL.isObject
             });
@@ -59,6 +59,17 @@
              */
             this.setAttributeConfig('findButtons',{
                 value:true,
+                validator:YL.isBoolean
+            });
+            /**
+             * If this is set to true, the form will not submit natively, but
+             * instead, if valid, fire an event called asyncSubmit.  This is handy
+             * for forms that submit data through AJAX.
+             * @attribute asyncSubmit
+             * @type boolean
+             */
+            this.setAttributeConfig('asyncSubmit',{
+                value:false,
                 validator:YL.isBoolean
             });
             /**
@@ -90,36 +101,50 @@
          */
         _init:function(){
             this._initializeSubmitButtons();
-            this._initializeInputs();
+            this._initializeFields();
             this._initializeEvents();
-            this.updateForm();
+            this.validate();
         },
         /**
          * This will hold all inputs that have validation applied to them
          * within the form.
          * @property _validation
-         * @type YAHOO.widget.Validator[]
+         * @type YAHOO.widget.FieldValidator[]
          * @protected
          */
         _validation:null,
+        /**
+         * This will hold all the indicators that are used with the fields in the
+         * form
+         * @property _indicators
+         * @type YAHOO.widget.FieldIndicator[]
+         */
+        _indicators: null,
         /**
          * This will initialize all the inputs given in the configuration.
          * For each input in the configuration, this will initialize the validation on
          * the input field, then register the indicators with the events specified in
          * the configuration.  Indicators elements will be created as neccessary
          *
-         * @method _initializeInputs
-         * @param {Object} config Configuration object
+         * @method _initializeFields
          */
-        _initializeInputs:function(){
-            var inputs = this.get('inputs'),curInput,j,curIndsJson,inds,key,indicatorKey,el,inputCfg,ind;
+        _initializeFields: function(){
+            var fields = this.get('fields'),curInput,j,curIndsJson,inds,key,indicatorKey,el,inputCfg,ind;
             this._validation = [];
             this._indicators = [];
-            for (key in inputs){
-                el = YD.get(key);
-                inputCfg = inputs[key];
-                curInput = new FormValidator.FieldValidator(el,inputCfg.validation);
-                // TODO: put in group support
+            for (key in fields){
+                inputCfg = fields[key];
+                // if its a group, we instantiate a form group
+                if (inputCfg.validation && inputCfg.validation.fields) {
+                    curInput = new FormValidator.FormGroup(key,inputCfg.validation);
+                }
+                else {
+                    el = YD.get(key);
+                    curInput = new FormValidator.FieldValidator(el,inputCfg.validation);
+                }
+                // due to the fact that select element's change events do not bubble, we
+                // need to subscribe directly to their change events.
+                this._checkSelect(curInput);
                 inds = inputCfg.indicators;
                 // singular, will subscribe to just the input change event
                 if (inds instanceof FormValidator.FieldIndicator){
@@ -139,7 +164,6 @@
                         }
                     }
                 }
-
                 ind = inputCfg.indicator;
                 if (ind){
                     if (ind instanceof FormValidator.FieldIndicator){
@@ -157,9 +181,25 @@
                         }
                     }
                 }
-
-                
                 this._validation.push(curInput);
+            }
+        },
+        /**
+         * This will check if the given input is a select.  If it is then it will
+         * register the on change event with the delegate function
+         * @method _checkSelect
+         */
+        _checkSelect:function(input){
+            if (FormValidator.FormGroup && (input instanceof FormValidator.FormGroup)) {
+                input.subscribe('selectChange',function(eventName,args) {
+                    this._onFormInteraction(null,args[0],null);
+                }, this, true);
+            }
+            else {
+                var element = input.get('element');
+                if (element.tagName.toLowerCase() === 'select'){
+                    YE.on(element,'change',function(){this._onFormInteraction(null,element,null);},this,true);
+                }
             }
         },
         /**
@@ -255,9 +295,18 @@
          */
         _getSubmitButtons:function(parent){
             var rtVl = [],children,i;
-            if (parent.tagName && (parent.tagName.toLowerCase() == 'input') && (parent.type == 'submit')){
-                return [parent];
+            if (parent.tagName){
+                if ((parent.tagName.toLowerCase() == 'input') && (parent.type == 'submit')){
+                    return [parent];
+                }
+                else if ((parent.tagName.toLowerCase() == 'input') && (parent.type == 'image')){
+                    return [parent];
+                }
+                else if ((parent.tagName.toLowerCase() == 'button')){
+                    return [parent];
+                }
             }
+
             children = YD.getChildren(parent)
             for (i = 0 ; i < children.length; ++i){
                 rtVl = rtVl.concat(this._getSubmitButtons(children[i]));
@@ -266,21 +315,49 @@
         },
         /**
          * This will cause all the indicators and validators to update to the proper display value
-         * @method updateForm
+         * @method validate
          */
-        updateForm:function(){
+        validate:function(){
             var vals = this._validation,i,isValid = true;
             for (i = 0 ; i < vals.length; ++i){
                 if (!vals[i].validate()){
                     isValid = false;
                 }
             }
-            if (isValid){
-                this.fireEvent('formValid');
+            if (isValid) {
+                this.fireEvent('formValid',this);
             }
-            else{
-                this.fireEvent('formInvalid');
+            else {
+                this.fireEvent('formInvalid',this);
             }
+        },
+        /**
+         * This will return all fields that are invalid
+         * @method getInvalidFields
+         * @return FieldValidator[]
+         */
+        getInvalidFields:function(){
+            var rtVl = [],i=0;
+            for (;i < this._validation.length; ++i) {
+                if (!this._validation[i].isValid()) {
+                    rtVl.push(this._validation[i]);
+                }
+            }
+            return rtVl;
+        },
+        /**
+         * This will return all fields that are valid
+         * @method getValidFields
+         * @return FieldValidator[]
+         */
+        getValidFields:function(){
+            var rtVl = [],i=0;
+            for (;i < this._validation.length; ++i) {
+                if (this._validation[i].isValid()) {
+                    rtVl.push(this._validation[i]);
+                }
+            }
+            return rtVl;
         },
         /**
          * This will return true if the WHOLE form is valid.
@@ -300,10 +377,10 @@
          */
         _onFormChange:function(){
             if (this.isValid()){
-                this.fireEvent('formValid');
+                this.fireEvent('formValid', this);
             }
             else{
-                this.fireEvent('formInvalid');
+                this.fireEvent('formInvalid',this);
             }
             this.fireEvent('onFormChange');
         },
@@ -317,35 +394,53 @@
             if (!this.isValid()){
                 return;
             }
-            var fn = this.get('beforeSubmit'),scope = this.get('beforeSubmitScope'),val = fn.call(scope),form = this.get('element');
-            if (val === false){
-                return;
-            }
-            this.fireEvent('formSubmit');
+            var form = this.get('element');
             // submit the form.
             if (form.submit){
                 form.submit();
             }
+            else {
+                this._checkEvents();
+            }
         },
         /**
-         * This function is called when the form is submitted.  If the form is
-         * not valid, the submit event on the form is cancelled.
+         * This function will check the settings of the form validator,
+         * fire the correct events, and if required, prevent the default
+         * action of the event.
+         * @method _checkEvents
+         * @param {Object} ev Window event that caused the submit.
          */
-        _onFormSubmit:function(ev){
+        _checkEvents:function(ev){
             if (!this.isValid()){
-                YE.preventDefault(ev);
+                if (ev) {
+                    YE.preventDefault(ev);
+                }
                 return;
             }
-            var fn = this.get('beforeSubmit'),scope = this.get('beforeSubmitScope'),val = fn.call(scope);
-            if (val === false){
-                YE.preventDefault(ev);
-                return;
+            var async = this.get('asyncSubmit');
+            if (async){
+                if (ev) {
+                    YE.preventDefault(ev);
+                }
+                /**
+                 * This is fired when the form's sumbit is asynchronous,
+                 * and should not submit natively.
+                 * @event asyncSubmit
+                 */
+                this.fireEvent('asyncSubmit');
             }
             /**
              * This is fired when the form is submitted.
              * @event formSubmit
              */
             this.fireEvent('formSubmit');
+        },
+        /**
+         * This function is called when the form is submitted.  If the form is
+         * not valid, the submit event on the form is cancelled.
+         */
+        _onFormSubmit:function(ev){
+            this._checkEvents(ev);
         },
         /**
          * This will be the event delgator.  Whenever a user interacts with the form
@@ -364,15 +459,62 @@
             }
         },
         /**
+         * This will return validators or groups with the given id.
+         * @method getById
+         * @return {YAHOO.widget.FieldValidator | YAHOO.widget.FormGroup} validator or form group with the given id.
+         */
+        getById: function (id) {
+            var vs = this._validation, i, temp;
+            for (i = 0; i < vs.length; ++i) {
+                if (vs[i] instanceof FormGroup) {
+                    if (vs[i].id === id) {
+                        return vs[i];
+                    }
+                    else {
+                        temp = vs[i].getById(id);
+                        if (temp) {
+                            return temp;
+                        }
+                    }
+                }
+                else if (vs[i].get('element').id === id) {
+                    return vs[i];
+                }
+            }
+            return null;
+        },
+        /**
          * Given an input DOM, this will return the field's validation object
          * @method getValidatorByInput
          * @param {HTMLElement} dom Dom object.
-         * @return {YAHOO.widget.FieldValidator
+         * @param {boolean} noGroups If set to true, groups will not be returned, only the validator.  If true, then if the dom is in a group, then the group will be returned instead of the group
+         * @return {YAHOO.widget.FieldValidator} Field Validator that matches the given dom.
          */
-        getValidatorByInput:function(dom){
-            var vs = this._validation,i;
-            for (i = 0; i < vs.length; ++i){
-                if (vs[i].get('element') == dom) return vs[i];
+        getValidatorByInput: function (dom, noGroups) {
+            var vs = this._validation, i, tempValidator, oDom = dom;
+            if (YL.isString(oDom)) {
+                oDom = YD.get(oDom);
+            }
+
+            if (!oDom) {
+                return null;
+            }
+
+            for (i = 0; i < vs.length; ++i) {
+                if (FormValidator.FormGroup && (vs[i] instanceof FormValidator.FormGroup)) {
+                    tempValidator = vs[i].getValidatorByInput(oDom, noGroups);
+                    if (tempValidator) {
+                        if (noGroups) {
+                            return tempValidator;
+                        }
+                        else {
+                            return vs[i];
+                        }
+                    }
+                }
+                else if (vs[i].get('element') === dom) {
+                    return vs[i];
+                }
             }
             return null;
         },
@@ -385,9 +527,9 @@
         _onFormReset:function(ev){
             var that = this;
             setTimeout(function(){
-                that.updateForm();
+                that.validate();
             },100);
-            this.updateForm();
+            this.validate();
         }
     });
     YW.FormValidator = FormValidator;

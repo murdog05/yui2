@@ -1,18 +1,4 @@
 /**
- * For group inputs, allow for sub elements to be put into the validator object.
- * There will then be a group validator that will be used to determine if the
- * group is valid.
- *
- * Have a predefined indicators for a group for valid and invalid where the show
- * subscribes to inputValid, and the hide subscribes to the inputEmpty event.  To do
- * this, the EMPTY event must be fired second (change the validator isValid function
- * to do this).  If its done this way, the grou behaviour sounds be implemented soundly.
- *
- * Put these new predefined indicators in the form class under the property FormValidator.indicators.group
- * so they are their own group of default indicators.
- */
-
-/**
  * This will house the validation function which
  * will perform the validation on the input field from the form.
  * @namespace YAHOO.widget
@@ -23,7 +9,7 @@
     YL = Y.lang,
     YU = Y.util,
     YW = Y.widget,
-    YD = YU.Dom
+    YD = YU.Dom;
     /**
      * The field validator class is
      * @class FieldValidator
@@ -65,6 +51,27 @@
          * @static
          */
         EMAILREGEX:/^([a-zA-Z0-9_\.\-])+\@(([a-zA-Z0-9\-])+\.)+([a-zA-Z0-9]{2,4})+$/,
+        /**
+         * This is the regular expression used to check if the user's password meets the strongest password strength criteria.
+         * @property StrongPassword
+         * @static
+         * @type regex
+         */
+        StrongPassword:/^(?=.{8,})(?=.*[A-Z])(?=.*[a-z])(?=.*[0-9])(?=.*\W).*$/,
+        /**
+         * This is the regular expression used to check if the user's password meets medium password strength criteria.
+         * @property MediumPassword
+         * @static
+         * @type regex
+         */
+        MediumPassword:/^(?=.{7,})(((?=.*[A-Z])(?=.*[a-z]))|((?=.*[A-Z])(?=.*[0-9]))|((?=.*[a-z])(?=.*[0-9]))).*$/,
+        /**
+         * This is the regular expression used to check if the user's password meets the minimum password strength criteria.
+         * @property WeakPassword
+         * @static
+         * @type regex
+         */
+        WeakPassword:/(?=.{6,}).*/,
         /**
          * Given a configuration that could be a string, function or a configuration object,
          * this will ensure a proper configuration object is returned and passed to the super class.
@@ -200,11 +207,58 @@
                 // TODO: Put in length checking
                 return YW.FieldValidator.EMAILREGEX.test(el.value);
             },
+            phone:function(el){
+                return /^([(]?[2-9]\d{2}[)]?)[ ]*-?[ ]*(\d{3})[ ]*-?[ ]*(\d{4})$/.test(el.value);
+            },
             checked:function(el){
                 return el.checked;
             },
             unchecked:function(el){
                 return !el.checked;
+            },
+            'strong-password':function(el) {
+                var strong = FieldValidator.StrongPassword,
+                medium = FieldValidator.MediumPassword,
+                weak = FieldValidator.WeakPassword;
+
+                if (strong.test(el.value)) {
+                    this.addMeta('strength','strong');
+                    return true;
+                }
+                else if (medium.test(el.value)) {
+                    this.addMeta('strength','medium');
+                    return false;
+                }
+                else if (weak.test(el.value)) {
+                    this.addMeta('strength','weak');
+                    return false;
+                }
+                else {
+                    this.addMeta('strength','none');
+                    return false;
+                }
+            },
+            'medium-password':function(el) {
+                var strong = FieldValidator.StrongPassword,
+                medium = FieldValidator.MediumPassword,
+                weak = FieldValidator.WeakPassword;
+
+                if (strong.test(el.value)) {
+                    this.addMeta('strength','strong');
+                    return true;
+                }
+                else if (medium.test(el.value)) {
+                    this.addMeta('strength','medium');
+                    return true;
+                }
+                else if (weak.test(el.value)) {
+                    this.addMeta('strength','weak');
+                    return false;
+                }
+                else {
+                    this.addMeta('strength','none');
+                    return false;
+                }
             }
         },
         /**
@@ -240,17 +294,7 @@
         initAttributes:function(config){
             var oConfigs = config || {};
             FieldValidator.superclass.initAttributes.call(this, oConfigs);
-
-            /**
-             * This is only for a group input.  For a group type input
-             * the children will be used to determine the validity of the input.
-             * @config children
-             * @type Object[]
-             */
-            this.setAttributeConfig('children',{
-                value:[],
-                validator:YL.isArray
-            });
+            
             /**
              * This is set to true if the minimum allowed values boundary is inclusive
              * @config minInclusive
@@ -345,6 +389,10 @@
                 value:false,
                 validator:YL.isBoolean
             });
+            this.setAttributeConfig('formatter', {
+                value: function(el) {},
+                validator:YL.isFunction
+            });
         },
         /**
          * This function will initialize the configuration attributes of the validator for validation
@@ -393,11 +441,12 @@
          * @return {boolean} true if the input is considered valid.
          */
         validate:function(silent){
-            var isEmpty,isValid,el,optional = this.get('optional');
+            var isEmpty, isValid, el, optional = this.get('optional'), formatter = this.get('formatter');
             el = this.get('element');
             var meta = this._getMetaWrapper();
             isEmpty = meta._empty(el,meta);
             isValid = meta._validator(el,meta) || (isEmpty && optional);
+            
             // if silent, don't invoke any events
             if (silent === true){
                 return isValid;
@@ -416,6 +465,10 @@
                 this.fireEvent('inputInvalid',[meta.metaData,this]);
             }
             this.fireEvent('inputValueChange',[meta.metaData,this]);
+            // call the formatter if the input is valid and non empty
+            if (isValid && !isEmpty) {
+                formatter.call({},el);
+            }
             return isValid;
         },
         /**
@@ -490,5 +543,8 @@
     YAHOO.widget.FieldValidator = FieldValidator;
     if (YW.FormValidator){
         YW.FormValidator.FieldValidator = FieldValidator;
+    }
+    if (YW.FormGroup) {
+        YW.FormGroup.FieldValidator = FieldValidator;
     }
 })();

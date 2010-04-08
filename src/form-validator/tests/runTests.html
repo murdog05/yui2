@@ -7,7 +7,7 @@
         <!--<link rel="stylesheet" type="text/css" href="http://yui.yahooapis.com/2.8.0r4/build/fonts/fonts-min.css" />-->
         <link rel="stylesheet" type="text/css" href="http://yui.yahooapis.com/2.8.0r4/build/yuitest/assets/skins/sam/yuitest.css" />
         <script type="text/javascript" src="http://yui.yahooapis.com/2.8.0r4/build/yahoo-dom-event/yahoo-dom-event.js"></script>
-        <script type="text/javascript" src="http://yui.yahooapis.com/2.8.0r4/build/element/element-min.js"></script>
+        <script type="text/javascript" src="http://yui.yahooapis.com/2.8.0r4/build/element/element.js"></script>
 
         <script type="text/javascript" src="http://yui.yahooapis.com/2.8.0r4/build/logger/logger-min.js"></script>
         <script type="text/javascript" src="http://yui.yahooapis.com/2.8.0r4/build/yuitest/yuitest-min.js"></script>
@@ -19,8 +19,10 @@
         <script type="text/javascript" src="field-indicator-test.js"></script>
         <script type="text/javascript" src="field-validator-test.js"></script>
         <script type="text/javascript" src="form-validator-test.js"></script>
+        <script type="text/javascript" src="form-group-test.js"></script>
 
         <script type="text/javascript" src="../js/form-validator.js"></script>
+        <script type="text/javascript" src="../js/form-group.js"></script>
         <script type="text/javascript" src="../js/form-button.js"></script>
         <script type="text/javascript" src="../js/field-indicator.js"></script>
         <script type="text/javascript" src="../js/field-validator.js"></script>
@@ -35,6 +37,7 @@
                 YAHOO.tool.TestRunner.add(YW.formValidatorTests.fieldIndicatorTestCase);
                 YAHOO.tool.TestRunner.add(YW.formValidatorTests.fieldValidatorTestCase);
                 YAHOO.tool.TestRunner.add(YW.formValidatorTests.formValidatorTestCase);
+                YAHOO.tool.TestRunner.add(YW.formValidatorTests.formGroupTestCase);
                 //run the tests
                 YAHOO.util.Event.on('runTestsButton','click',function(){
                     YAHOO.tool.TestRunner.run();

@@ -113,7 +113,6 @@
         initAttributes:function(config){
             var oConfigs = config || {};
             FieldIndicator.superclass.initAttributes.call(this, oConfigs);
-
             /**
              * This is the function that is called when the indicator is shown.
              * @attribute formatter
@@ -298,5 +297,8 @@
     YW.FieldIndicator = FieldIndicator;
     if (YW.FormValidator){
         YW.FormValidator.FieldIndicator = FieldIndicator;
+    }
+    if (YW.FormGroup) {
+        YW.FormGroup.FieldIndicator = FieldIndicator;
     }
 })();

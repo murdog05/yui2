@@ -335,6 +335,26 @@ YL.augmentObject(YW.formValidatorTests,{
             Assert.isTrue(validCalled);
             Assert.isTrue(emptyCalled);
             Assert.isFalse(notEmptyCalled);
+        },
+        testFormatter: function () {
+            var Assert = YAHOO.util.Assert;
+            var doubleInput = new YW.FieldValidator(this.input,{
+                type:'double',
+                optional:true,
+                formatter:function(el) {
+                    el.value += '44444';
+                }
+            });
+
+            this.input.value = '';
+            doubleInput.validate();
+            Assert.areEqual('', this.input.value);
+            this.input.value = 'aaaa';
+            doubleInput.validate();
+            Assert.areEqual('aaaa', this.input.value);
+            this.input.value = '32.1';
+            doubleInput.validate();
+            Assert.areEqual('32.144444', this.input.value);
         }
     })
 });
