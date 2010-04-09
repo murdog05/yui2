@@ -1,6 +1,5 @@
 /*jslint white: true, forin: true, onevar: true, undef: true, eqeqeq: true, bitwise: true, regexp: true, strict: true, newcap: true, immed: true */
 "use strict";
-var YAHOO = YAHOO || {};
 
 (function () {
     var Y = YAHOO,
@@ -33,7 +32,6 @@ var YAHOO = YAHOO || {};
          */
         initAttributes: function (config) {
             var oConfigs = config || {};
-            FormValidator.superclass.initAttributes.call(this, oConfigs);
             /**
              * This will hold the configuration for the fields of the form
              * @attribute fields
@@ -142,7 +140,7 @@ var YAHOO = YAHOO || {};
                 inputCfg = fields[key];
                 // if its a group, we instantiate a form group
                 if (inputCfg.validation && inputCfg.validation.fields) {
-                    curInput = new FormValidator.FormGroup(key, inputCfg.validation);
+                    curInput = new FormValidator.FieldGroup(key, inputCfg.validation);
                 }
                 else {
                     el = YD.get(key);
@@ -196,7 +194,7 @@ var YAHOO = YAHOO || {};
          * @method _checkSelect
          */
         _checkSelect: function (input) {
-            if (FormValidator.FormGroup && (input instanceof FormValidator.FormGroup)) {
+            if (FormValidator.FieldGroup && (input instanceof FormValidator.FieldGroup)) {
                 input.subscribe('selectChange', function (eventName, args) {
                     this._onFormInteraction(null, args[0], null);
                 }, this, true);
@@ -479,12 +477,12 @@ var YAHOO = YAHOO || {};
         /**
          * This will return validators or groups with the given id.
          * @method getById
-         * @return {YAHOO.widget.FieldValidator | YAHOO.widget.FormGroup} validator or form group with the given id.
+         * @return {YAHOO.widget.FieldValidator | YAHOO.widget.FieldGroup} validator or form group with the given id.
          */
         getById: function (id) {
             var vs = this._validation, i, temp;
             for (i = 0; i < vs.length; ++i) {
-                if (FormValidator.FormGroup && (vs[i] instanceof FormValidator.FormGroup)) {
+                if (FormValidator.FieldGroup && (vs[i] instanceof FormValidator.FieldGroup)) {
                     if (vs[i].id === id) {
                         return vs[i];
                     }
@@ -519,7 +517,7 @@ var YAHOO = YAHOO || {};
             }
 
             for (i = 0; i < vs.length; ++i) {
-                if (FormValidator.FormGroup && (vs[i] instanceof FormValidator.FormGroup)) {
+                if (FormValidator.FieldGroup && (vs[i] instanceof FormValidator.FieldGroup)) {
                     tempValidator = vs[i].getValidatorByInput(oDom, noGroups);
                     if (tempValidator) {
                         if (noGroups) {

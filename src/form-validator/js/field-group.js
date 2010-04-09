@@ -1,6 +1,5 @@
 /*jslint white: true, forin: true, onevar: true, undef: true, eqeqeq: true, bitwise: true, regexp: true, strict: true, newcap: true, immed: true */
 "use strict";
-var YAHOO = YAHOO || {};
 
 (function () {
     var Y = YAHOO,
@@ -14,13 +13,13 @@ var YAHOO = YAHOO || {};
     /**
      * @namespace YAHOO.widget
      * This will represent a group of fields inside the form validator.
-     * @class FormGroup
+     * @class FieldGroup
      */
-    function FormGroup(id, config) {
+    function FieldGroup(id, config) {
         this.init(id, config);
     }
     // Add on default validators for Group
-    YL.augmentObject(FormGroup, {
+    YL.augmentObject(FieldGroup, {
         /**
          * Premade validators for the group.
          * @property Validators
@@ -52,7 +51,7 @@ var YAHOO = YAHOO || {};
         }
     });
 
-    FormGroup.prototype = {
+    FieldGroup.prototype = {
         /**
          * This is the id of the form group.  This is optional, if not set
          * then the group cannot be retreived by id.
@@ -133,7 +132,7 @@ var YAHOO = YAHOO || {};
              * @type Object[]
              */
             this.setAttributeConfig('type', {
-                value: FormGroup.Validators.any,
+                value: FieldGroup.Validators.any,
                 validator: function (val) {
                     return YL.isFunction(val) || YL.isString(val);
                 },
@@ -142,7 +141,7 @@ var YAHOO = YAHOO || {};
                         return val;
                     }
                     else {
-                        return FormGroup.Validators[val];
+                        return FieldGroup.Validators[val];
                     }
                 }
             });
@@ -234,11 +233,11 @@ var YAHOO = YAHOO || {};
             for (key in fields) {
                 inputCfg = fields[key];
                 if (inputCfg.validation && inputCfg.validation.fields) {
-                    curInput = new FormGroup.FormGroup(key, inputCfg.validation);
+                    curInput = new FieldGroup.FieldGroup(key, inputCfg.validation);
                 }
                 else {
                     el = YD.get(key);
-                    curInput = new FormGroup.FieldValidator(el, inputCfg.validation);
+                    curInput = new FieldGroup.FieldValidator(el, inputCfg.validation);
                     // make the input optional, as it is in a group.
                     curInput.set('optional', true);
                 }
@@ -247,7 +246,7 @@ var YAHOO = YAHOO || {};
                 this._checkSelect(curInput);
                 inds = inputCfg.indicators;
                 // singular, will subscribe to just the input change event
-                if (inds instanceof FormGroup.FieldIndicator) {
+                if (inds instanceof FieldGroup.FieldIndicator) {
                     // if just an indicator is given, it is automatically subscribed to all
                     this._initializeIndicator('all', curInput, inds);
                 }
@@ -267,7 +266,7 @@ var YAHOO = YAHOO || {};
 
                 ind = inputCfg.indicator;
                 if (ind) {
-                    if (ind instanceof FormGroup.FieldIndicator) {
+                    if (ind instanceof FieldGroup.FieldIndicator) {
                         // if just an indicator is given, it is automatically subscribed to all
                         this._initializeIndicator('all', curInput, ind);
                     }
@@ -293,7 +292,7 @@ var YAHOO = YAHOO || {};
          * @method _checkSelect
          */
         _checkSelect: function (input) {
-            if (input instanceof FormGroup) {
+            if (input instanceof FieldGroup) {
                 input.subscribe('selectChange', function (eventName, args) {
                     this._onSelectChange(null, args[0], null);
                 }, this, true);
@@ -320,11 +319,11 @@ var YAHOO = YAHOO || {};
          */
         _initializeIndicator: function (eventKey, fieldValidator, indicatorConfig) {
             var indicator;
-            if (indicatorConfig instanceof FormGroup.FieldIndicator) {
+            if (indicatorConfig instanceof FieldGroup.FieldIndicator) {
                 indicator = indicatorConfig;
             }
             else {
-                indicator = new FormGroup.FieldIndicator(indicatorConfig, fieldValidator.get('element'));
+                indicator = new FieldGroup.FieldIndicator(indicatorConfig, fieldValidator.get('element'));
             }
             indicator.registerEvents(fieldValidator, eventKey);
             this._indicators.push(indicator);
@@ -332,12 +331,12 @@ var YAHOO = YAHOO || {};
         /**
          * This will return validators or groups with the given id.
          * @method getById
-         * @return {YAHOO.widget.FieldValidator | YAHOO.widget.FormGroup} validator or form group with the given id.
+         * @return {YAHOO.widget.FieldValidator | YAHOO.widget.FieldGroup} validator or form group with the given id.
          */
         getById: function (id) {
             var vs = this._validation, i, temp;
             for (i = 0; i < vs.length; ++i) {
-                if (vs[i] instanceof FormGroup) {
+                if (vs[i] instanceof FieldGroup) {
                     if (vs[i].id === id) {
                         return vs[i];
                     }
@@ -371,7 +370,7 @@ var YAHOO = YAHOO || {};
                 return null;
             }
             for (i = 0; i < vs.length; ++i) {
-                if (vs[i] instanceof FormGroup) {
+                if (vs[i] instanceof FieldGroup) {
                     tempValidator = vs[i].getValidatorByInput(dom);
                     if (tempValidator) {
                         if (noGroups) {
@@ -405,10 +404,10 @@ var YAHOO = YAHOO || {};
          * @event inputNotEmpty
          */
     };
-    YL.augmentObject(FormGroup.prototype, AP.prototype);
+    YL.augmentObject(FieldGroup.prototype, AP.prototype);
 
-    YW.FormGroup = FormGroup;
+    YW.FieldGroup = FieldGroup;
     if (YW.FormValidator) {
-        YW.FormValidator.FormGroup = FormGroup;
+        YW.FormValidator.FieldGroup = FieldGroup;
     }
 }());

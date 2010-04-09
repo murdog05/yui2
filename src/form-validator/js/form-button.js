@@ -1,6 +1,5 @@
 /*jslint white: true, forin: true, onevar: true, undef: true, eqeqeq: true, bitwise: true, regexp: true, strict: true, newcap: true, immed: true */
 "use strict";
-var YAHOO = YAHOO || {};
 
 (function () {
     var Y = YAHOO,

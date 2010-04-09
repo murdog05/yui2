@@ -1,6 +1,5 @@
 /*jslint white: true, browser: true, forin: true, onevar: true, undef: true, eqeqeq: true, bitwise: true, regexp: true, strict: true, newcap: true, immed: true */
 "use strict";
-var YAHOO = YAHOO || {};
 
 /**
  * This will house the validation function which
@@ -22,7 +21,7 @@ var YAHOO = YAHOO || {};
      */
     function FieldValidator(el, config) {
         FieldValidator.superclass.constructor.apply(this, [el, FieldValidator._initConfig(config)]);
-    }    
+    }
 
     YL.augmentObject(FieldValidator, {
         /**
@@ -38,7 +37,7 @@ var YAHOO = YAHOO || {};
          * @type regex
          * @static
          */
-        INTEGERREGEX: /(^-?\d\d*\.\d*$)|(^-?\d\d*$)|(^-?\.\d\d*$)/,
+        INTEGERREGEX: /(^-?\d\d*$)/,
         /**
          * Regular expression used by the DoubleField for ensuring the input matches the format of an double
          * @property DOUBLEREGEX
@@ -80,7 +79,7 @@ var YAHOO = YAHOO || {};
          * @static
          * @type regex
          */
-        WeakPassword: /(?=.{6,}).*/,
+        WeakPassword: /(?=[a-zA-Z0-9]{6,}).*/,
         /**
          * Given a configuration that could be a string, function or a configuration object,
          * this will ensure a proper configuration object is returned and passed to the super class.
@@ -161,14 +160,9 @@ var YAHOO = YAHOO || {};
                     this.addMeta('incorrectFormat', 'Format of number is incorrect');
                     return false; // don't allow numbers with decimals
                 }
-                try {
-                    theVal = parseInt(value, 10);
-                }
-                catch (e) {
-                    return false;
-                }
-
-                if (theVal.toString().toLowerCase() === 'nan') {
+                theVal = parseInt(value, 10);
+ 
+                if (isNaN(theVal) || !isFinite(theVal)) {
                     this.addMeta('incorrectFormat', 'Format of number is incorrect');
                     return false;
                 }
@@ -188,22 +182,15 @@ var YAHOO = YAHOO || {};
                 if (!YW.FieldValidator.DOUBLEREGEX.test(el.value)) {
                     this.addMeta('incorrectFormat', 'Format of double is incorrect');
                     return false;
-                }                
-                try {
-                    numVal = parseFloat(value, 10);
                 }
-                catch (e) {
+
+                numVal = parseFloat(value, 10);
+
+                if (isNaN(numVal) || !isFinite(numVal)) {
+                    this.addMeta('incorrectFormat', 'Format of double is incorrect');
                     return false;
                 }
 
-                if (!numVal.toString()) {
-                    this.addMeta('incorrectFormat', 'Format of double is incorrect');
-                    return false;
-                }
-                if (numVal.toString().toLowerCase() === 'nan') {
-                    this.addMeta('incorrectFormat', 'Format of double is incorrect');
-                    return false;
-                }
                 return this._validation._checkRange(numVal, this);
             },
             text: function (el) {
@@ -300,9 +287,6 @@ var YAHOO = YAHOO || {};
          * @private
          */
         initAttributes: function (config) {
-            var oConfigs = config || {};
-            FieldValidator.superclass.initAttributes.call(this, oConfigs);
-            
             /**
              * This is set to true if the minimum allowed values boundary is inclusive
              * @config minInclusive
@@ -538,7 +522,7 @@ var YAHOO = YAHOO || {};
     if (YW.FormValidator) {
         YW.FormValidator.FieldValidator = FieldValidator;
     }
-    if (YW.FormGroup) {
-        YW.FormGroup.FieldValidator = FieldValidator;
+    if (YW.FieldGroup) {
+        YW.FieldGroup.FieldValidator = FieldValidator;
     }
 }());

@@ -52,7 +52,7 @@ YL.augmentObject(YW.formValidatorTests,{
             Assert.areEqual(this.input,children[0]);
             var indicatorEl = indicator.get('element');
             Assert.areEqual(indicatorEl,children[1]);
-            Assert.areEqual('&nbsp;',indicatorEl.innerHTML);
+            Assert.areEqual('',indicatorEl.innerHTML);
             Assert.areEqual('indicator',indicatorEl.className);
         },
         /**
@@ -71,7 +71,7 @@ YL.augmentObject(YW.formValidatorTests,{
             Assert.areEqual(this.input,children[0]);
             var indicatorEl = indicator.get('element');
             Assert.areEqual(indicatorEl,children[1]);
-            Assert.areEqual('&nbsp;',indicatorEl.innerHTML);
+            Assert.areEqual('',indicatorEl.innerHTML);
             Assert.areEqual('indicator',indicatorEl.className);
             Assert.areEqual('DIV',indicatorEl.tagName);
         },

@@ -1,6 +1,5 @@
 /*jslint white: true, browser: true, forin: true, onevar: true, undef: true, eqeqeq: true, bitwise: true, regexp: true, strict: true, newcap: true, immed: true */
 "use strict";
-var YAHOO = YAHOO || {};
 
 (function () {
     var Y = YAHOO,
@@ -73,12 +72,12 @@ var YAHOO = YAHOO || {};
             correct: {
                 tagType: 'DIV',
                 className: 'indicator',
-                html: '&nbsp;'
+                html: ''
             },
             incorrect: {
                 tagType: 'DIV',
                 className: 'validator',
-                html: '&nbsp;'
+                html: ''
             },
             emptystyle: {
                 tagType: 'DIV',
@@ -115,7 +114,6 @@ var YAHOO = YAHOO || {};
          */
         initAttributes: function (config) {
             var oConfigs = config || {};
-            FieldIndicator.superclass.initAttributes.call(this, oConfigs);
             /**
              * This is the function that is called when the indicator is shown.
              * @attribute formatter
@@ -137,7 +135,6 @@ var YAHOO = YAHOO || {};
                     }
                 }
             });
-
             this.setAttributeConfig('style', {
                 value: null
             });
@@ -302,7 +299,7 @@ var YAHOO = YAHOO || {};
     if (YW.FormValidator) {
         YW.FormValidator.FieldIndicator = FieldIndicator;
     }
-    if (YW.FormGroup) {
-        YW.FormGroup.FieldIndicator = FieldIndicator;
+    if (YW.FieldGroup) {
+        YW.FieldGroup.FieldIndicator = FieldIndicator;
     }
 }());
