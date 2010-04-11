@@ -287,6 +287,8 @@
          * @private
          */
         initAttributes: function (config) {
+            //var oConfig = config || {};
+            //oConfig = FieldValidator._initConfig(oConfig);
             /**
              * This is set to true if the minimum allowed values boundary is inclusive
              * @config minInclusive

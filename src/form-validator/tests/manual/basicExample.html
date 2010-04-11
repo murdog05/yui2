@@ -10,7 +10,6 @@
 
 
         <script type="text/javascript" src="../../js/form-validator.js"></script>
-        <script type="text/javascript" src="../../js/form-button.js"></script>
         <script type="text/javascript" src="../../js/field-validator.js"></script>
         <script type="text/javascript" src="../../js/field-indicator.js"></script>
         <script type="text/javascript">
@@ -43,7 +42,7 @@
                                 invalid:[
                                     {el:'ageIncorrect'},
                                     {
-                                        style:{tagType:'SPAN'},
+                                        html:'<SPAN></SPAN>',
                                         formatter:function(fieldValidator,fieldIndicator,meta){
                                             var el = fieldIndicator.get('element'),belowMin = meta.numberBelowMin, aboveMax = meta.numberAboveMax;
                                             if (belowMin !== null && belowMin !== undefined){

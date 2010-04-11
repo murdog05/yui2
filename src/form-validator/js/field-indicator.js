@@ -63,27 +63,14 @@
             }
         },
         /**
-         * This holds the default style used for creating indicators dynamically.
-         * @property DefaultStyle
+         * This holds the default HTML that will be used to create an indicator.
+         * @property IndicatorHtml
          * @static
          * @type Object
          */
-        DefaultStyle: {
-            correct: {
-                tagType: 'DIV',
-                className: 'indicator',
-                html: ''
-            },
-            incorrect: {
-                tagType: 'DIV',
-                className: 'validator',
-                html: ''
-            },
-            emptystyle: {
-                tagType: 'DIV',
-                className: '',
-                html: ''
-            }
+        IndicatorHtml: {
+            correct: '<div class="indicator"></div>',
+            incorrect: '<div class="validator"></div>'
         },
         /**
          * This is a collection of default configurations for indicators
@@ -93,14 +80,10 @@
          */
         Indicators: {
             correct: function () {
-                return {
-                    style: 'correct'
-                };
+                return {html: FieldIndicator.IndicatorHtml.correct};
             },
             incorrect: function () {
-                return {
-                    style: 'incorrect'
-                };
+                return {html: FieldIndicator.IndicatorHtml.incorrect};
             }
         }
     });
@@ -113,7 +96,6 @@
          * @private
          */
         initAttributes: function (config) {
-            var oConfigs = config || {};
             /**
              * This is the function that is called when the indicator is shown.
              * @attribute formatter
@@ -135,7 +117,12 @@
                     }
                 }
             });
-            this.setAttributeConfig('style', {
+            this.setAttributeConfig('html', {
+                value: null
+            });
+            // You can set HTML directly, or you can set type.  Setting type is just
+            // like using a default property, for example. correct and incorrect.
+            this.setAttributeConfig('type', {
                 value: null
             });
         },
@@ -159,35 +146,30 @@
                 theConfig = FieldIndicator.Indicators[theConfig].call();
             }
             if (!neighbor && !el) {
-                YAHOO.log('No dom element given to field indicator, nor is there any way to create the dom element', 'warn', 'FieldIndicator');
+                Y.log('No dom element given to field indicator, nor is there any way to create the dom element', 'warn', 'FieldIndicator');
                 return [theConfig];
             }
             // initialize the dom
-            el = this._initializeDom(theConfig.el, theConfig.style, neighbor);
-            theConfig.style = null; // clear the style, it is not needed anymore.
+            el = this._initializeDom(el, theConfig.html || FieldIndicator.IndicatorHtml[theConfig.type], neighbor);
+            //theConfig.html = null; // clear the html, if there is any
             return [el, theConfig];
         },
         /**
          * This function will create an Html element for the indicator after the given neighbor
          * @method _initializeDom
-         * @param {HTMLElement} el The value defined under the el property in the given configuration
+         * @param {HTMLElement | String} el The dom, or the id of the dom object that will represent this indicator
          * @param {Object} style Style object for creating the html element
          * @param {HTMLElement} neighbor Html Element that the new Html Element will be placed beside.
          * @return {HTMLElement} new html element that will represent the indicator.
          */
-        _initializeDom: function (el, style, neighbor) {
-            var theEl = el, doInsert = true, theStyle = style;
-            // if the el is a string
+        _initializeDom: function (el, html, neighbor) {
+            var theEl = el;
+            // If we have an id instead of the actual dom object
             if (YL.isString(theEl)) {
                 theEl = YD.get(theEl);
             }
-            if (theEl) {
-                doInsert = false;
-            }
-            theEl = this._setupEl(theEl, theStyle);
-
-            // if the el was created, then it will need to be inserted.
-            if (doInsert) {
+            if (!theEl) {
+                theEl = this._createEl(html);
                 YD.insertAfter(theEl, neighbor);
             }
 
@@ -224,7 +206,7 @@
             for (methodName in eventCfg) {
                 method = this[methodName];
                 if (!YL.isFunction(method)) {
-                    YAHOO.log('You can only use functions to subscribe to validator events', 'warn', 'FieldIndicator');
+                    Y.log('You can only use functions to subscribe to validator events', 'warn', 'FieldIndicator');
                 }
                 events = eventCfg[methodName];
                 for (i = 0 ; i < events.length; ++i) {
@@ -233,41 +215,20 @@
             }
         },
         /**
-         * Given a HTML object, id, or null, this will create a DOM object (but not insert it into the document yet) that
-         * will represent the indicator on the form.  If a new one is created, it will
-         * be created using the given style.  If no style defined, then no style applied.
-         * @method _setupEl
-         * @param {HTMLElement} el Optional HTML element, if null is given, a new element will be created
-         * @param {Object|String} style Configuration or key for default style used to create the element.  Information such as tag type, class name and inner html would be defined here
-         * @return {HTMLElement} html element styled using the given configuration.
+         * This will use a worker dom to create a child dom from the given
+         * html.  It will then remove the child from the parent (worker dom),
+         * and then return it from the function.
+         * @method _createEl
+         * @param {String} html Html that will be used to create the el
+         * @return {HTMLElement} DOM object created from the html.
          */
-        _setupEl: function (el, style) {
-            var rtVl = el, theStyle = style;
-            if (!style) {
-                theStyle = FieldIndicator.DefaultStyle.emptystyle;
-            }
-            else if (YL.isString(theStyle)) {
-                theStyle = FieldIndicator.DefaultStyle[theStyle.toLowerCase()];
-            }
-            // if we still don't have a value for rtVl, then a dom object must be created
-            if (!rtVl) {
-                rtVl = document.createElement(theStyle.tagType);
-                if (theStyle.html) {
-                    rtVl.innerHTML = theStyle.html;
-                }
-                if (theStyle.className) {
-                    rtVl.className = theStyle.className;
-                }
-            }
-            else {
-                if ((rtVl.className === '') && theStyle.className) {
-                    rtVl.className = theStyle.className;
-                }
-            }
-
+        _createEl: function (html) {
+            var workerDom = document.createElement('DIV'), rtVl;
+            workerDom.innerHTML = html;
+            rtVl = YD.getChildren(workerDom)[0];
+            workerDom.removeChild(rtVl);
             return rtVl;
         },
-        
         /**
          * This will show the indicator.  This will call the formatter
          * function provided to the indicator.

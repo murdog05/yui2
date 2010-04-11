@@ -22,27 +22,5 @@ var mocks = {};
     Y.augment(FieldValidatorMock,YU.EventProvider);
 
     mocks.FieldValidatorMock = FieldValidatorMock;
-
-    function FormButtonMock(){
-        
-    }
-    FormButtonMock.prototype = {
-        enabled:true,
-        /**
-         * This will enable the button
-         * @method enable
-         */
-        enable:function(){
-            this.enabled = true;
-        },
-        /**
-         * This will disable the button
-         * @method disable
-         */
-        disable:function(){
-            this.enabled = false;
-        }
-    }
-    mocks.FormButtonMock = FormButtonMock;
 })();
 

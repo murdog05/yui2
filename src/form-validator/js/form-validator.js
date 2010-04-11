@@ -22,6 +22,29 @@
         this._init();
     }
     
+    YL.augmentObject(FormValidator, {
+        /**
+         * Default function for enabling buttons.  This function expects
+         * that the button parameter be an HTML Element.
+         * @method DefaultEnableButton
+         * @static
+         * @param {HTMLElement} button Button element.
+         */
+        DefaultEnableButton : function (button) {
+            button.disabled = false;
+        },
+        /**
+         * Default function for disabling buttons.  This function expects
+         * that the button parameter be an HTML Element.
+         * @method DefaultDisableButton
+         * @static
+         * @param {HTMLElement} button Button element.
+         */
+        DefaultDisableButton : function (button) {
+            button.disabled = true;
+        }
+    });
+
     Y.extend(FormValidator, YU.Element, {
         /**
          * Implementation of Element's abstract method. Sets up config values.
@@ -265,15 +288,15 @@
             if (YL.isArray(configButtons)) {
                 for (i = 0 ; i < configButtons.length; ++i) {
                     button = this._addButton(configButtons[i]);
-                    if (button.get('element').id) {
-                        tempHash[button.get('element').id] = true;
+                    if (button.id) {
+                        tempHash[button.id] = true;
                     }
                 }
             }
             else if (configButtons) {
                 button = this._addButton(configButtons);
-                if (button.get('element').id) {
-                    tempHash[button.get('element').id] = true;
+                if (button.id) {
+                    tempHash[button.id] = true;
                 }
             }
 
@@ -282,7 +305,7 @@
                 for (i = 0 ; i < submitButtons.length; ++i) {
                     // prevent duplicates
                     if (!tempHash[submitButtons[i].id]) {
-                        this._addButton(submitButtons[i]);
+                        this._addButtonEl(submitButtons[i]);
                     }
                 }
             }
@@ -290,15 +313,31 @@
         /**
          * Thils will add the given el to the form as a button which will be enabled
          * when the form is valid, and disabled when the form is invalid.
-         * @method _addButton
+         * @method _addButtonEl
          * @param {HTMLElement|String} el
-         * @return {YAHOO.widget.FormButton newly created button
+         * @return {Object} newly added button
          */
-        _addButton: function (el) {
-            var button = new FormValidator.FormButton(el);
+        _addButtonEl: function (buttonEl) {
+            return this._addButton({button: buttonEl});
+        },
+        /**
+         * This will add the given el to the form as a button which will be enabled
+         * when the form is valid, and disabled when the form is invalid.
+         * @method _addButton
+         * @param {HTMLElement|String|Object} buttonConfig This can be a configuration object with enable, disable and el properties.  This could also be the id of a DOM object, or the DOM object itself
+         * @return {Object} The button object
+         */
+        _addButton: function (buttonConfig) {
+            var config = YL.isString(buttonConfig) ? {button:YD.get(buttonConfig)} : buttonConfig, button = config.button,
+            enableFunc = config.enable || FormValidator.DefaultEnableButton,
+            disableFunc = config.disable || FormValidator.DefaultDisableButton;
+            this.subscribe('formValid', function () {
+                enableFunc.call({}, button);
+            });
+            this.subscribe('formInvalid', function () {
+                disableFunc.call({}, button);
+            });
             this.buttons.push(button);
-            this.subscribe('formValid', button.enable, button, true);
-            this.subscribe('formInvalid', button.disable, button, true);
             return button;
         },
         /**

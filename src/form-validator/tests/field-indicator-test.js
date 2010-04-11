@@ -61,11 +61,7 @@ YL.augmentObject(YW.formValidatorTests,{
         testInitialize_CreateDom_partialdefault:function(){
             var Assert = YAHOO.util.Assert;
             // create a correct indicator
-            var indicator = new YW.FieldIndicator(
-                {
-                    style:'correct'
-                },
-                this.input);
+            var indicator = new YW.FieldIndicator('correct',this.input);
             Assert.isObject(indicator.get('element'));
             var children = YD.getChildren(this.hiddenDiv);
             Assert.areEqual(this.input,children[0]);
@@ -84,11 +80,7 @@ YL.augmentObject(YW.formValidatorTests,{
             // create a correct indicator
             var indicator = new YW.FieldIndicator(
                 {
-                    style:{
-                        tagType:'SPAN',
-                        className:'indicator_test',
-                        html:'&nbsp;'
-                    }
+                    html: '<SPAN class="indicator_test">&nbsp;</SPAN>'
                 },
                 this.input);
             Assert.isObject(indicator.get('element'));
@@ -143,7 +135,7 @@ YL.augmentObject(YW.formValidatorTests,{
             validIndicator = new YW.FieldIndicator('correct',this.input),
             validIndicatorEl = validIndicator.get('element'),
             invalidIndicator = new YW.FieldIndicator({
-                style:'correct',
+                type:'correct',
                 formatter:function(fieldValidator,fieldIndicator,meta){
                     formatterInfo.fieldValidator = fieldValidator;
                     formatterInfo.fieldIndicator = fieldIndicator;

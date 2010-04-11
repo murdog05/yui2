@@ -10,22 +10,11 @@
 
         <script type="text/javascript" src="../../js/form-validator.js"></script>
         <script type="text/javascript" src="../../js/field-group.js"></script>
-        <script type="text/javascript" src="../../js/form-button.js"></script>
         <script type="text/javascript" src="../../js/field-validator.js"></script>
         <script type="text/javascript" src="../../js/field-indicator.js"></script>
 
         <script type="text/javascript">
             var validator = YAHOO.widget, YD = YAHOO.util.Dom;
-            YAHOO.widget.FieldIndicator.DefaultStyle.incorrect = {
-                tagType:'SPAN',
-                className:'validator',
-                html:'&nbsp;'
-            };
-            YAHOO.widget.FieldIndicator.DefaultStyle.correct = {
-                tagType:'SPAN',
-                className:'indicator',
-                html:'&nbsp;'
-            };
             window.onload = function() {
                 var form = new YAHOO.widget.FormValidator('basicExample',{
                     fields:{

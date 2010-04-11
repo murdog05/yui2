@@ -10,21 +10,14 @@
 
         <script type="text/javascript" src="../../js/form-element.js"></script>
         <script type="text/javascript" src="../../js/form-validator.js"></script>
-        <script type="text/javascript" src="../../js/form-button.js"></script>
         <script type="text/javascript" src="../../js/field-validator.js"></script>
         <script type="text/javascript" src="../../js/field-indicator.js"></script>
         <script type="text/javascript">
             window.onload = function() {
-                YAHOO.widget.FieldIndicator.DefaultStyle.incorrect = {
-                    tagType:'SPAN',
-                    className:'validator',
-                    html:'&nbsp;'
-                };
-                YAHOO.widget.FieldIndicator.DefaultStyle.correct = {
-                    tagType:'SPAN',
-                    className:'indicator',
-                    html:'&nbsp;'
-                };
+                // setup the default indicator HTML
+                YAHOO.widget.FieldIndicator.IndicatorHtml.incorrect = '<div class="validator"><SPAN class="validator">&nbsp;</SPAN></div>';
+                YAHOO.widget.FieldIndicator.IndicatorHtml.correct = '<div class="indicator"><SPAN class="indicator">&nbsp;</SPAN></div>';
+
                 var form = new YAHOO.widget.FormValidator('basicExample1',{
                     fields:{
                         firstName:{

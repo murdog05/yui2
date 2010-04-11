@@ -92,9 +92,9 @@ YL.augmentObject(YW.formValidatorTests,{
                 }
             });
             Assert.areEqual(3,validator.buttons.length);
-            Assert.areEqual(imageButton,validator.buttons[0].get('element'));
-            Assert.areEqual(button,validator.buttons[1].get('element'));
-            Assert.areEqual(this.formButton,validator.buttons[2].get('element'));
+            Assert.areEqual(imageButton,validator.buttons[0]);
+            Assert.areEqual(button,validator.buttons[1]);
+            Assert.areEqual(this.formButton,validator.buttons[2]);
         },
         /**
          * This will test the enabling and disabling of submit buttons based
