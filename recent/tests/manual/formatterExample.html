@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>Formatter Example</title>
+        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+        <link rel="stylesheet" href="css/validatorCss.css" type="text/css" />
+        <script type="text/javascript" src="http://yui.yahooapis.com/2.8.0r4/build/yahoo-dom-event/yahoo-dom-event.js"></script>
+        <script type="text/javascript" src="http://yui.yahooapis.com/2.8.0r4/build/element/element-debug.js"></script>
+        <script type="text/javascript" src="http://yui.yahooapis.com/2.8.0r4/build/event-delegate/event-delegate-min.js"></script>
+
+
+        <script type="text/javascript" src="../../js/form-validator.js"></script>
+        <script type="text/javascript" src="../../js/field-validator.js"></script>
+        <script type="text/javascript" src="../../js/field-indicator.js"></script>
+        <script type="text/javascript">
+            var validator = YAHOO.widget;
+            window.onload = function() {
+                var form = new YAHOO.widget.FormValidator('basicExample',{
+                    fields:{
+                        firstName:{
+                            validation:'text',
+                            indicators:{
+                                invalid:{el:'firstNameIncorrect'},
+                                valid:{el:'firstNameCorrect'}
+                            }
+                        },
+                        lastName:{
+                            validation:'text',
+                            indicators:{
+                                invalid:{el:'lastNameIncorrect'},
+                                valid:{el:'lastNameCorrect'}
+                            }
+                        },
+                        phone:{
+                            validation:{
+                                type:'phone',
+                                formatter: function (el) {
+                                    var rtVl = el.value.replace(eval('/[)(\\- ]/g'),'');
+                                    el.value = '(' + rtVl.substring(0,3) + ') ' + rtVl.substring(3,6) + '-' + rtVl.substring(6);
+                                }
+                            },
+                            indicators:{
+                                invalid:{el:'phone-incorrect'},
+                                valid:{el:'phone-correct'}
+                            }
+                        },
+                        income:{
+                            validation:{
+                                type:'double',
+                                max:40000,
+                                min:0,
+                                maxDecimalPlaces:2
+                            },
+                            indicators:{
+                                invalid:[
+                                    {
+                                        el:'incomeRange',
+                                        formatter:function(fieldValidator,fieldIndicator,meta){
+                                            var el = fieldIndicator.get('element'),belowMin = meta.numberBelowMin, aboveMax = meta.numberAboveMax;
+                                            if (belowMin !== null && belowMin !== undefined){
+                                                el.innerHTML = 'Income must be greater than or equal to ' + belowMin.min;
+                                                el.style.display = '';
+                                            }
+                                            else if (aboveMax !== null && aboveMax !== undefined){
+                                                el.innerHTML = 'Income must be less than or equal to ' + aboveMax.max;
+                                                el.style.display = '';
+                                            }
+                                            else{
+                                                el.style.display = 'none';
+                                            }
+                                        }
+                                    }
+                                ],
+                                valid:{el:'incomeCorrect'}
+                            }
+                        }
+                    }
+                });
+            }            
+        </script>
+    </head>
+    <body>
+        <div class="mainContainer">
+            <form id="basicExample" action="formPost.html">
+                <div class="formBody">
+                    <h2>Formatters</h2>
+                    <div class="info">
+                        An example that shows how you can use formatting on the validation
+                        to ensure a specific format for the input.  In this example, the
+                        form validator will ensure that phone has a format of (xxx) xxx-xxxx.
+                    </div>
+                    <div class="row">
+                        <div class="column1Backing"></div>
+                        <div class="column2Backing"></div>
+                        <div class="label">First Name:</div>
+                        <div class="value">
+                            <div id="firstNameIncorrect" class="validator">
+                                <span class="validator">&nbsp;</span>
+                            </div>
+                            <div id="firstNameCorrect" class="indicator" style="display:none;">
+                                <span class="indicator">&nbsp;</span>
+                            </div>
+                            <input id="firstName" type="text" />
+                        </div>
+                        <div class="label">Last Name:</div>
+                        <div class="value">
+                            <div id="lastNameIncorrect" class="validator">
+                                <span class="validator">&nbsp;</span>
+                            </div>
+                            <div id="lastNameCorrect" class="indicator" style="display:none;">
+                                <span class="indicator">&nbsp;</span>
+                            </div>
+                            <input id="lastName" type="text" />
+                        </div>
+                        <div class="clearDiv"></div>
+                    </div>
+                    <div class="row">
+                        <div class="column1Backing"></div>
+                        <div class="column2Backing"></div>
+                        <div class="label">Phone:</div>
+                        <div class="value">
+                            <div id="phone-incorrect" class="validator">
+                                <span class="validator">&nbsp;</span>
+                            </div>
+                            <div id="phone-correct" class="indicator" style="display:none;">
+                                <span class="indicator">&nbsp;</span>
+                            </div>
+                            <div class="innerValue">
+                                <input id="phone" type="text" />
+                            </div>
+                        </div>
+                        <div class="label">Income ($):</div>
+                        <div class="value">
+                            <div id="incomeIncorrect" class="validator">
+                                <span class="validator">&nbsp;</span>
+                            </div>
+                            <div id="incomeCorrect" class="indicator" style="display:none;">
+                                <span class="indicator">&nbsp;</span>
+                            </div>
+                            <div class="innerValue">
+                                <input id="income" type="text" />
+                            </div>
+                        </div>
+                        <div class="clearDiv"></div>
+                    </div>
+                    <div id="incomeRange">
+
+                    </div>
+                    <div class="buttonRow">
+                        <input type="submit" class="button" value="Save" />
+                        <!--<input type="button" id="clearButton" class="button" value="Clear" />-->
+                        <input type="reset" class="button" value="Reset" />
+                        <input type="button" class="button" value="Cancel" />
+                    </div>
+                </div>
+            </form>
+        </div>
+    </body>
+</html>
