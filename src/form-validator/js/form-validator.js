@@ -119,7 +119,16 @@
                 value: {},
                 validator: YL.isObject
             });
-
+            /**
+             * When true, this will cause the form to validate the inputs only
+             * when the submit button is clicked.
+             * @attribute checkOnSubmit
+             * @type Object
+             */
+            this.setAttributeConfig('checkOnSubmit', {
+                value: false,
+                validator: YL.isBoolean
+            });
         },
         /**
          * This will initialize the form validator
@@ -169,6 +178,7 @@
                     el = YD.get(key);
                     curInput = new FormValidator.FieldValidator(el, inputCfg.validation);
                 }
+                curInput.on('inputStatusChange', this._onFormChange, this, true);
                 // due to the fact that select element's change events do not bubble, we
                 // need to subscribe directly to their change events.
                 this._checkSelect(curInput);
@@ -330,12 +340,15 @@
         _addButton: function (buttonConfig) {
             var config = YL.isString(buttonConfig) ? {button:YD.get(buttonConfig)} : buttonConfig, button = config.button,
             enableFunc = config.enable || FormValidator.DefaultEnableButton,
-            disableFunc = config.disable || FormValidator.DefaultDisableButton;
+            disableFunc = config.disable || FormValidator.DefaultDisableButton,
+            me = this;
             this.subscribe('formValid', function () {
                 enableFunc.call({}, button);
             });
             this.subscribe('formInvalid', function () {
-                disableFunc.call({}, button);
+                if (!me.get('checkOnSubmit')) {
+                    disableFunc.call({}, button);
+                }
             });
             this.buttons.push(button);
             return button;
@@ -383,6 +396,7 @@
             else {
                 this.fireEvent('formInvalid', this);
             }
+            return isValid;
         },
         /**
          * This will return all fields that are invalid
@@ -446,10 +460,17 @@
          * @method submit
          */
         submit: function () {
-            if (!this.isValid()) {
+            var form = this.get('element'), checkOnSubmit = this.get('checkOnSubmit'), isValid;
+            // if check on submit is true, we want all the fields to update when submit is clicked
+            if (checkOnSubmit) {
+                isValid = this.validate();
+            }
+            else {
+                isValid = this.isValid();
+            }
+            if (!isValid) {
                 return;
             }
-            var form = this.get('element');
             // submit the form.
             if (form.submit) {
                 form.submit();
@@ -466,7 +487,14 @@
          * @param {Object} ev Window event that caused the submit.
          */
         _checkEvents: function (ev) {
-            if (!this.isValid()) {
+            var isValid;
+            if (this.get('checkOnSubmit')) {
+                isValid = this.validate();
+            }
+            else {
+                isValid = this.isValid();
+            }
+            if (!isValid) {
                 if (ev) {
                     YE.preventDefault(ev);
                 }
@@ -509,7 +537,9 @@
         _onFormInteraction: function (event, matchedEl, container) {
             var validator = this.getValidatorByInput(matchedEl);
             if (validator) {
-                validator.validate();
+                if (!this.get('checkOnSubmit')) {
+                    validator.validate();
+                }
                 this._onFormChange();
             }
         },

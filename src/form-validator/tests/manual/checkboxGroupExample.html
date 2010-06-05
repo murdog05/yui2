@@ -1,0 +1,86 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
+    "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+    <head>
+        <title></title>
+        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+        <link rel="stylesheet" href="css/validatorCss.css" type="text/css" />
+        <script type="text/javascript" src="http://yui.yahooapis.com/2.8.0r4/build/yahoo-dom-event/yahoo-dom-event.js"></script>
+        <script type="text/javascript" src="http://yui.yahooapis.com/2.8.0r4/build/element/element-debug.js"></script>
+        <script type="text/javascript" src="http://yui.yahooapis.com/2.8.0r4/build/event-delegate/event-delegate-min.js"></script>
+
+        <script type="text/javascript" src="../../js/form-validator.js"></script>
+        <script type="text/javascript" src="../../js/field-group.js"></script>
+        <script type="text/javascript" src="../../js/field-validator.js"></script>
+        <script type="text/javascript" src="../../js/field-indicator.js"></script>
+        <script type="text/javascript">
+            var validator = YAHOO.widget;
+            window.onload = function() {
+                var form = new YAHOO.widget.FormValidator('basicExample',{
+                    fields:{
+                        'checkbox-group':{
+                            validation:{
+                                type:'one',
+                                fields:{
+                                    '0to10000':{validation:'checked'},
+                                    '10000to20000':{validation:'checked'},
+                                    '20000to30000':{validation:'checked'},
+                                    '30000to40000':{validation:'checked'},
+                                    '40000to50000':{validation:'checked'},
+                                    '50000ormore':{validation:'checked'}
+                                }
+                            },
+                            indicators: {
+                                invalid: {el:'income-bracket-incorrect'},
+                                valid: {el:'income-bracket-correct'}
+                            }
+                        }
+                    }
+                });
+            }
+        </script>
+    </head>
+    <body>
+        <div class="mainContainer">
+            <form id="basicExample" action="formPost.html">
+                <div class="formBody">
+                    <h2>Checkbox Group Example</h2>
+                    <div class="info">
+                        <p>
+                            This will show you how to setup a group of checkboxes which requires
+                            only 1 to be checked.  By default a check box is valid when checked.
+                        </p>
+                    </div>
+                    <div>
+                        <div id="income-bracket-incorrect" style="color:#f00;" class="row">
+                            Select only one income bracket.
+                        </div>
+                        <div id="income-bracket-correct" class="row">
+                            Income bracket properly selected.
+                        </div>
+                        <div id="incomeGroup" class="row">
+                            <div class="column1Backing"></div>
+                            <div class="column2Backing"></div>
+                            <div class="label">Choose Income Range:</div>
+                            <div class="value">
+                                <input id="0to10000" type="checkbox" />0 - $10,000<br />
+                                <input id="10000to20000" type="checkbox" />$10,000 - $20,000<br />
+                                <input id="20000to30000" type="checkbox" />$20,000 - $30,000<br />
+                                <input id="30000to40000" type="checkbox" />$30,000 - $40,000<br />
+                                <input id="40000to50000" type="checkbox" />$40,000 - $50,000<br />
+                                <input id="50000ormore" type="checkbox" />$50,000 or more<br />
+                            </div>
+                            <div class="clearDiv"></div>
+                        </div>
+                    </div>
+                    <div class="buttonRow">
+                        <input type="submit" class="button" value="Save" />
+                        <input type="button" id="clearButton" class="button" value="Clear" />
+                        <input type="reset" class="button" value="Reset" />
+                        <input type="button" class="button" value="Cancel" />
+                    </div>
+                </div>
+            </form>
+        </div>
+    </body>
+</html>

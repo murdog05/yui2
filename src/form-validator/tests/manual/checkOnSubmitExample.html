@@ -18,6 +18,7 @@
                 YAHOO.widget.FieldIndicator.IndicatorHtml.correct = '<div class="indicator"><SPAN class="indicator">&nbsp;</SPAN></div>';
 
                 var form = new YAHOO.widget.FormValidator('basicExample1',{
+                    checkOnSubmit: true,
                     fields:{
                         firstName:{
                             validation:'text',
@@ -56,7 +57,26 @@
                             },
                             indicators:{
                                 valid:'correct',
-                                invalid:'incorrect'
+                                invalid:[
+                                    'incorrect',
+                                    {
+                                        html:'<DIV style="position: absolute;z-index:3;top:10px;left:65px;"></DIV>',
+                                        formatter:function(fieldValidator,fieldIndicator,meta){
+                                            var el = fieldIndicator.get('element'),belowMin = meta.numberBelowMin, aboveMax = meta.numberAboveMax;
+                                            if (belowMin !== null && belowMin !== undefined){
+                                                el.innerHTML = 'must be >= ' + belowMin.min;
+                                                el.style.display = '';
+                                            }
+                                            else if (aboveMax !== null && aboveMax !== undefined){
+                                                el.innerHTML = 'must be <= ' + aboveMax.max;
+                                                el.style.display = '';
+                                            }
+                                            else{
+                                                el.style.display = 'none';
+                                            }
+                                        }
+                                    }
+                                ]
                             }
                         },
                         income:{
@@ -68,16 +88,27 @@
                             },
                             indicators:{
                                 valid:'correct',
-                                invalid:'incorrect'
+                                invalid:[
+                                    'incorrect',
+                                    {
+                                        el:'incomeRange',
+                                        formatter:function(fieldValidator,fieldIndicator,meta){
+                                            var el = fieldIndicator.get('element'),belowMin = meta.numberBelowMin, aboveMax = meta.numberAboveMax;
+                                            if (belowMin !== null && belowMin !== undefined){
+                                                el.innerHTML = 'Income must be greater than or equal to ' + belowMin.min;
+                                                el.style.display = '';
+                                            }
+                                            else if (aboveMax !== null && aboveMax !== undefined){
+                                                el.innerHTML = 'Income must be less than or equal to ' + aboveMax.max;
+                                                el.style.display = '';
+                                            }
+                                            else{
+                                                el.style.display = 'none';
+                                            }
+                                        }
+                                    }
+                                ]
                             }
-                        },
-                        age2:{
-                            validation:{
-                                type:'integer',
-                                max:100,
-                                min:3
-                            },
-                            indicator:'incorrect'
                         }
                     }
                 });
@@ -90,12 +121,15 @@
         <div class="mainContainer">
             <form id="basicExample1" action="formPost.html">
                 <div class="formBody">
-                    <h2>Simple Dynamic Validators</h2>
+                    <h2>Check on submit Example</h2>
                     <div class="info">
-                        This shows the bare minimum needed in order to
-                        get the form validator working with your existing form.
-                        The form validator will insert indicators and validators
-                        for your inputs.
+                         This is for larger forms, where checking the input after every change
+                         in the form could be too expensive. By default when an input is changed,
+                         the input that is changed updates its indicators to reflect the new value, and then
+                         the validator is called to update the state of the input buttons. This can
+                         get expensive if you have a alot of input fields, to solve this, the checkOnSubmit
+                         feature only updates the form's status when the submit button is clicked, instead
+                         of whenever an input field is changed.
                     </div>
                     <div class="row">
                         <div class="column1Backing"></div>
@@ -128,7 +162,7 @@
                         <div class="column2Backing"></div>
                         <div class="label">Age:</div>
                         <div class="value">
-                            <input id="age" type="text" />
+                            <input id="age" style="width:50px;" type="text" />
                         </div>
                         <div class="label">Income ($):</div>
                         <div class="value">
@@ -138,15 +172,6 @@
                     </div>
                     <div id="incomeRange">
 
-                    </div>
-                    <div class="row">
-                        <div class="column1Backing"></div>
-                        <div class="column2Backing"></div>
-                        <div class="label">Age 2:</div>
-                        <div class="value">
-                            <input id="age2" size="3" type="text" />
-                        </div>
-                        <div class="clearDiv"></div>
                     </div>
                     <div class="buttonRow">
                         <input type="submit" id="save" class="button" value="Save" />
