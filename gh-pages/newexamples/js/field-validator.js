@@ -265,16 +265,7 @@
          */
         EmptyWhen: {
             notext: function (el) {
-                if (el.type && (el.type.toLowerCase() === 'checkbox' || el.type.toLowerCase() === 'radio')) {
-                    return !el.checked;
-                }
                 return el.value === '';
-            },
-            notChecked: function (el) {
-                return !el.checked;
-            },
-            checked: function (el) {
-                return el.checked;
             }
         }
     });
@@ -296,6 +287,8 @@
          * @private
          */
         initAttributes: function (config) {
+            //var oConfig = config || {};
+            //oConfig = FieldValidator._initConfig(oConfig);
             /**
              * This is set to true if the minimum allowed values boundary is inclusive
              * @config minInclusive
@@ -390,43 +383,8 @@
                 value: false,
                 validator: YL.isBoolean
             });
-            /**
-             * Allows input to be formatted a specific way, must
-             * be used with a proper regex.
-             * @config formatter
-             * @type function
-             */
             this.setAttributeConfig('formatter', {
                 value: function (el) {},
-                validator: YL.isFunction
-            });
-            /**
-             * If set to true, this input is considered off, and not used.
-             * @config off
-             * @type boolean
-             */
-            this.setAttributeConfig('off', {
-                value: false,
-                validator: YL.isBoolean
-            });
-            /**
-             * This is the function used for disabling the input.  By default
-             * it will set the disabled property to true on the el.
-             * @config disableFunction
-             * @type function
-             */
-            this.setAttributeConfig('disableFunction', {
-                value: function (el) {el.disabled = true;},
-                validator: YL.isFunction
-            });
-            /**
-             * This is the function used for enabling the input.  By default
-             * it will set the disabled property to false on the el.
-             * @config enableFunction
-             * @type function
-             */
-            this.setAttributeConfig('enableFunction', {
-                value: function (el) {el.disabled = false;},
                 validator: YL.isFunction
             });
         },
@@ -460,44 +418,6 @@
             return this._getMetaWrapper()._empty(this.get('element'));
         },
         /**
-         * This will turn the given input on, and invoke the validate
-         * function to update all indicators.
-         * @method turnOn
-         */
-        turnOn: function (silent) {
-            this.set('off', false);
-            if (!silent) {
-                this.validate();
-                this.fireEvent('inputStatusChange', this);
-            }
-        },
-        /**
-         * This will turn the given input off, and invoke the validate
-         * function to update all indicators.
-         * @method turnOn
-         */
-        turnOff: function (silent) {
-            this.set('off', true);
-            if (!silent) {
-                this.validate();
-                this.fireEvent('inputStatusChange', this);
-            }
-        },
-        /**
-         * This will enable the input represented by this validator
-         * @method enable
-         */
-        enable: function () {
-            this.get('enableFunction').call({}, this.get('element'));
-        },
-        /**
-         * This will enable the input represented by this validator
-         * @method disable
-         */
-        disable: function () {
-            this.get('disableFunction').call({}, this.get('element'));
-        },
-        /**
          * This will check the validity of the input
          * and throw the proper events based on the empty and validation functions.
          * @method validate
@@ -506,15 +426,11 @@
          */
         validate: function (silent) {
             var el = this.get('element'), optional = this.get('optional'), formatter = this.get('formatter'), meta = this._getMetaWrapper(),
-            isEmpty = meta._empty(el, meta), turnedOff = this.get('off'), isValid = meta._validator(el, meta) || (isEmpty && optional) || turnedOff;
+            isEmpty = meta._empty(el, meta), isValid = meta._validator(el, meta) || (isEmpty && optional);
             
             // if silent, don't invoke any events
             if (silent === true) {
                 return isValid;
-            }
-            if (turnedOff) {
-                this.fireEvent('turnedOff', [meta.metaData, this]);
-                return isValid; // fire no other events.
             }
             if (isEmpty) {
                 this.fireEvent('inputEmpty', [meta.metaData, this]);
@@ -602,10 +518,6 @@
         /**
          * Fires when the input is considered non-empty, always fired before the valid/invalid events.
          * @event inputNotEmpty
-         */
-        /**
-         * Fires when an input is turned on or off.
-         * @event inputStatusChange
          */
     });
     YAHOO.widget.FieldValidator = FieldValidator;
