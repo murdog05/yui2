@@ -46,14 +46,14 @@
             },
             valid: function () {
                 return {
-                    hide: ['inputInvalid', 'turnedOff'],
+                    hide: ['inputInvalid'],
                     show: ['inputValid']
                 };
             },
             invalid: function () {
                 return {
                     show: ['inputInvalid'],
-                    hide: ['inputValid', 'turnedOff']
+                    hide: ['inputValid']
                 };
             },
             all: function () {
