@@ -47,6 +47,24 @@
                     }
                 }
                 return validOneFound && !invalidFound;
+            },
+            one: function (fields, meta, silent) {
+                var i, numValid = 0, invalidFound = false, curValid;
+                for (i = 0 ; i < fields.length; ++i) {
+                    if (silent) {
+                        curValid = fields[i].isValid();
+                    } else {
+                        curValid = fields[i].validate();
+                    }
+                    // if any one of the field is
+                    if (curValid && !fields[i].isEmpty()) {
+                        numValid++;
+                    }
+                    else if (!curValid) {
+                        invalidFound = true;
+                    }
+                }
+                return (numValid == 1) && !invalidFound;
             }
         }
     });
@@ -154,11 +172,53 @@
                 value: {},
                 validator: YL.isObject
             });
+            /**
+             * If set to true, this group is considered off, and not used.
+             * @config off
+             * @type boolean
+             */
+            this.setAttributeConfig('off', {
+                value: false,
+                validator: YL.isBoolean
+            });
 
             for (key in oConfigs) {
                 if (oConfigs[key] !== undefined) {
                     this.set(key, oConfigs[key]);
                 }
+            }
+        },
+        /**
+         * This will turn the given input on, and invoke the validate
+         * function to update all indicators.
+         * @method turnOn
+         */
+        turnOn: function (silent) {
+            this.set('off', false);
+            var fields = this._validation, i;
+            for (i = 0 ; i < fields.length; ++i) {
+                fields[i].turnOn(true);
+            }
+            if (!silent) {
+                this.validate();
+                this.fireEvent('inputStatusChange', this);
+            }
+            
+        },
+        /**
+         * This will turn the given input off, and invoke the validate
+         * function to update all indicators.
+         * @method turnOn
+         */
+        turnOff: function (silent) {
+            this.set('off', true);
+            var fields = this._validation, i;
+            for (i = 0 ; i < fields.length; ++i) {
+                fields[i].turnOff(true);
+            }
+            if (!silent) {
+                this.validate();
+                this.fireEvent('inputStatusChange', this);
             }
         },
         /**
@@ -170,11 +230,15 @@
          * @return {boolean} true if the group is valid.
          */
         validate: function (silent) {
-            var meta = this._getMetaWrapper(),
-            isValid = meta._validator(this._validation, meta, false),
+            var meta = this._getMetaWrapper(), turnedOff = this.get('off'),
+            isValid = meta._validator(this._validation, meta, false) || turnedOff,
             isEmpty = this.isEmpty();
 
             if (silent === true) {
+                return isValid;
+            }
+            if (turnedOff) {
+                this.fireEvent('turnedOff', [meta.metaData, this]);
                 return isValid;
             }
             if (isEmpty) {
@@ -210,7 +274,7 @@
          * @return {boolean} true if there is at least one child field that is non-empty.
          */
         isEmpty: function () {
-            var fields = this.get('fields'), i;
+            var fields = this._validation, i;
             for (i = 0 ; i < fields.length; ++i) {
                 if (!fields[i].isEmpty()) {
                     return false;

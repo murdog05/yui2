@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>Turn groups on/off</title>
+        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+        <link rel="stylesheet" href="css/validatorCss.css" type="text/css" />
+        <script type="text/javascript" src="http://yui.yahooapis.com/2.8.0r4/build/yahoo-dom-event/yahoo-dom-event.js"></script>
+        <script type="text/javascript" src="http://yui.yahooapis.com/2.8.0r4/build/element/element-debug.js"></script>
+        <script type="text/javascript" src="http://yui.yahooapis.com/2.8.0r4/build/event-delegate/event-delegate-min.js"></script>
+
+        <script type="text/javascript" src="../../js/form-validator.js"></script>
+        <script type="text/javascript" src="../../js/field-group.js"></script>
+        <script type="text/javascript" src="../../js/field-validator.js"></script>
+        <script type="text/javascript" src="../../js/field-indicator.js"></script>
+
+        <script type="text/javascript">
+            var validator = YAHOO.widget, YD = YAHOO.util.Dom;
+            window.onload = function() {
+                var form = new YAHOO.widget.FormValidator('basicExample',{
+                    fields:{
+                        'username-email':{
+                            validation:{
+                                type:'any',
+                                fields:{
+                                    username:{
+                                        validation:'text',
+                                        indicators:{
+                                            invalid:{el:'username-incorrect'},
+                                            valid:{el:'username-correct'}
+                                        }
+                                    },
+                                    email:{
+                                        validation:'email',
+                                        indicators:{
+                                            invalid:{el:'email-incorrect'},
+                                            valid:{el:'email-correct'}
+                                        }
+                                    }
+                                }
+                            },
+                            indicators: {
+                                invalid:{el:'username-email-incorrect'},
+                                valid:{el:'username-email-correct'}
+                            }
+                        },
+                        password: {
+                            validation:'medium-password',
+                            indicators:{
+                                all:{
+                                    el:'password-strength',
+                                    formatter: function (fieldValidator, fieldIndicator, meta) {
+                                        var el = fieldIndicator.get('element');
+                                        if (meta.strength === 'none') {
+                                            el.innerHTML = '';
+                                        }
+                                        else {
+                                            el.innerHTML = meta.strength;
+                                        }
+                                    }
+                                },
+                                invalid:{el:'password-incorrect'},
+                                valid:{el:'password-correct'}
+                            }
+                        },
+                        'retype-password': {
+                            validation:function(el) {
+                                var password = YD.get('password');
+                                return (el.value != '') && (el.value === password.value);
+                            },
+                            indicators:{
+                                invalid:{el:'retype-password-incorrect'},
+                                valid:{el:'retype-password-correct'}
+                            }
+                        }
+                    }
+                });
+                var field = form.getById('username-email');
+                YAHOO.util.Event.addListener('turnOnButton','click',function(){field.turnOn()});
+                YAHOO.util.Event.addListener('turnOffButton','click',function(){field.turnOff()});
+            }
+        </script>
+    </head>
+    <body>
+        <div class="mainContainer">
+            <form id="basicExample" action="formPost.html">
+                <div class="formBody">
+                    <h2>Turn Group on/off Example</h2>
+                    <div class="info">
+                        <p>
+                            This will show how a group can be turned on/off
+                        </p>
+                    </div>
+                    <div>
+                        <div id="username-email-incorrect" style="color:#f00;" class="row">
+                            Fill in either a user name or email to use to login.
+                        </div>
+                        <div id="username-email-correct" class="row">
+                            User name or email correctly filled in.
+                        </div>
+                        <div id="userNameGroup" class="row">
+                            <div class="column1Backing"></div>
+                            <div class="column2Backing"></div>
+                            <div class="label">Email:</div>
+                            <div class="value">
+                                <div id="email-incorrect" class="validator">
+                                    <span class="validator">&nbsp;</span>
+                                </div>
+                                <div id="email-correct" class="indicator" style="display:none;">
+                                    <span class="indicator">&nbsp;</span>
+                                </div>
+                                <div class="innerValue">
+                                    <input id="email" type="text" />
+                                </div>
+                            </div>
+                            <div class="label">Username:</div>
+                            <div class="value">
+                                <div id="username-incorrect" class="validator">
+                                    <span class="validator">&nbsp;</span>
+                                </div>
+                                <div id="username-correct" class="indicator" style="display:none;">
+                                    <span class="indicator">&nbsp;</span>
+                                </div>
+                                <div class="innerValue">
+                                    <input id="username" type="text" />
+                                </div>
+                            </div>
+                            <div class="clearDiv"></div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="column1Backing"></div>
+                        <div class="column2Backing"></div>
+                        <div class="label">Password:</div>
+                        <div class="value">
+                            <div id="password-incorrect" class="validator">
+                                <span class="validator">&nbsp;</span>
+                            </div>
+                            <div id="password-correct" class="indicator" style="display:none;">
+                                <span class="indicator">&nbsp;</span>
+                            </div>
+                            <div class="innerValue">
+                                <input id="password" type="password" />
+                                <span id="password-strength" style="text-transform: capitalize;"></span>
+                            </div>
+                        </div>
+                        <div class="label">Re-type Password:</div>
+                        <div class="value">
+                            <div id="retype-password-incorrect" class="validator">
+                                <span class="validator">&nbsp;</span>
+                            </div>
+                            <div id="retype-password-correct" class="indicator" style="display:none;">
+                                <span class="indicator">&nbsp;</span>
+                            </div>
+                            <input id="retype-password" type="password" />
+                        </div>
+                        <div class="clearDiv"></div>
+                    </div>
+
+                    <div class="buttonRow">
+                        <input type="submit" class="button" value="Save" />
+                        <!--<input type="button" id="clearButton" class="button" value="Clear" />-->
+                        <input type="reset" class="button" value="Reset" />
+                        <input type="button" class="button" value="Cancel" />
+                    </div>
+                    <div class="buttonRow">
+                        <input type="button" id="turnOnButton" class="button" value="Turn On group" />
+                        <input type="button" id="turnOffButton" class="button" value="Turn Off group" />
+                    </div>
+                </div>
+            </form>
+        </div>
+    </body>
+</html>
