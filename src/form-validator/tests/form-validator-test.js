@@ -419,9 +419,9 @@ YL.augmentObject(YW.formValidatorTests,{
                     }
                 },
                 buttons:['formButton','formButton2'],
-                asyncSubmit:true
+                async:true
             });
-            validator.on('asyncSubmit',function(){asyncSubmitted = true;});
+            validator.on('async',function(){asyncSubmitted = true;});
             validator.submit();
             Assert.isFalse(asyncSubmitted);
             formValid = true;
@@ -559,11 +559,11 @@ YL.augmentObject(YW.formValidatorTests,{
             Assert.areEqual('none', this.correctEl.style.display);
             Assert.isTrue(validator.buttons[0].disabled);
 
-            validator.getById('test-text-input').turnOff();
+            validator.getField('test-text-input').turnOff();
             Assert.areEqual('none', this.incorrectEl.style.display);
             Assert.areEqual('none', this.correctEl.style.display);
             Assert.isFalse(validator.buttons[0].disabled);
-            validator.getById('test-text-input').turnOn();
+            validator.getField('test-text-input').turnOn();
             Assert.areEqual('', this.incorrectEl.style.display);
             Assert.areEqual('none', this.correctEl.style.display);
             Assert.isTrue(validator.buttons[0].disabled);
@@ -619,7 +619,7 @@ YL.augmentObject(YW.formValidatorTests,{
 
             Assert.isTrue(validator.buttons[0].disabled);
 
-            validator.getById('test-group').turnOff();
+            validator.getField('test-group').turnOff();
 
             Assert.areEqual('none', this.incorrectEl.style.display);
             Assert.areEqual('none', this.correctEl.style.display);
