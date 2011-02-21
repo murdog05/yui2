@@ -393,25 +393,29 @@
             this._indicators.push(indicator);
         },
         /**
-         * This will return validators or groups with the given id.
-         * @method getById
+         * This will return validators or groups with the given id or dom element.
+         * @method getField
+         * @param {id|DOMElement} id Id or DOM element of validator.
          * @return {YAHOO.widget.FieldValidator | YAHOO.widget.FieldGroup} validator or form group with the given id.
          */
-        getById: function (id) {
-            var vs = this._validation, i, temp;
+        getField: function (id) {
+            var vs = this._validation, i, temp, isDom = YL.isObject(id);
             for (i = 0; i < vs.length; ++i) {
                 if (vs[i] instanceof FieldGroup) {
                     if (vs[i].id === id) {
                         return vs[i];
                     }
                     else {
-                        temp = vs[i].getById(id);
+                        temp = vs[i].getField(id);
                         if (temp) {
                             return temp;
                         }
                     }
                 }
-                else if (vs[i].get('element').id === id) {
+                else if (!isDom && vs[i].get('element').id === id) {
+                    return vs[i];
+                }
+                else if (isDom && vs[i].get('element') === id) {
                     return vs[i];
                 }
             }

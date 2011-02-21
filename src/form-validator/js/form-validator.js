@@ -88,12 +88,12 @@
             });
             /**
              * If this is set to true, the form will not submit natively, but
-             * instead, if valid, fire an event called asyncSubmit.  This is handy
+             * instead, if valid, fire an event called async.  This is handy
              * for forms that submit data through AJAX.
-             * @attribute asyncSubmit
+             * @attribute async
              * @type boolean
              */
-            this.setAttributeConfig('asyncSubmit', {
+            this.setAttributeConfig('async', {
                 value: false,
                 validator: YL.isBoolean
             });
@@ -500,7 +500,7 @@
                 }
                 return;
             }
-            var async = this.get('asyncSubmit');
+            var async = this.get('async');
             if (async) {
                 if (ev) {
                     YE.preventDefault(ev);
@@ -508,9 +508,9 @@
                 /**
                  * This is fired when the form's sumbit is asynchronous,
                  * and should not submit natively.
-                 * @event asyncSubmit
+                 * @event async
                  */
-                this.fireEvent('asyncSubmit', this);
+                this.fireEvent('async', this);
             }
             /**
              * This is fired when the form is submitted.
@@ -544,25 +544,29 @@
             }
         },
         /**
-         * This will return validators or groups with the given id.
-         * @method getById
+         * This will return validators or groups with the given id or dom element.
+         * @method getField
+         * @param {id|DOMElement} id Id or DOM element of validator.
          * @return {YAHOO.widget.FieldValidator | YAHOO.widget.FieldGroup} validator or form group with the given id.
          */
-        getById: function (id) {
-            var vs = this._validation, i, temp;
+        getField: function (id) {
+            var vs = this._validation, i, temp, isDom = YL.isObject(id);
             for (i = 0; i < vs.length; ++i) {
                 if (FormValidator.FieldGroup && (vs[i] instanceof FormValidator.FieldGroup)) {
                     if (vs[i].id === id) {
                         return vs[i];
                     }
                     else {
-                        temp = vs[i].getById(id);
+                        temp = vs[i].getField(id);
                         if (temp) {
                             return temp;
                         }
                     }
                 }
-                else if (vs[i].get('element').id === id) {
+                else if (!isDom && vs[i].get('element').id === id) {
+                    return vs[i];
+                }
+                else if (isDom && vs[i].get('element') === id) {
                     return vs[i];
                 }
             }
