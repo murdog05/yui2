@@ -20,7 +20,7 @@
                 YAHOO.widget.FieldIndicator.IndicatorHtml.correct = '<div class="indicator"><SPAN class="indicator">&nbsp;</SPAN></div>';
 
                 var form = new YAHOO.widget.FormValidator('basicExample1',{
-                    asyncSubmit: true,
+                    async: true,
                     fields:{
                         firstName:{
                             validation:'text',
@@ -77,7 +77,7 @@
                     }
                 });
                 // subscribe to the async submission of the form.
-                form.on('asyncSubmit', function(_form) {
+                form.on('async', function(_form) {
                     var formData = YAHOO.util.Connect.setForm(_form.get('element'));
                     var callback = {
                         success: function (response){

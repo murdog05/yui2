@@ -107,7 +107,7 @@
                         }
                     }
                 });
-                var field = form.getById('firstName');
+                var field = form.getField('firstName');
                 YAHOO.util.Event.addListener('enableButton','click',function(){field.enable();});
                 YAHOO.util.Event.addListener('disableButton','click',function(){field.disable()});
                 YAHOO.util.Event.addListener('turnOnButton','click',function(){field.turnOn()});
